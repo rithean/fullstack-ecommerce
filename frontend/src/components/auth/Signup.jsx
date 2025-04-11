@@ -1,15 +1,22 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock } from "react-icons/fa"; // Importing FontAwesome icons
+import { FaEnvelope, FaLock, FaUser } from "react-icons/fa"; 
 
-const Login = () => {
+const SignUp = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState({
+  const [form, setForm] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
@@ -20,7 +27,11 @@ const Login = () => {
     let errors = {};
     let isValid = true;
 
-    // Validate Email
+    if (!form.name) {
+      errors.name = "Name is required.";
+      isValid = false;
+    }
+
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!form.email) {
       errors.email = "Email is required.";
@@ -30,7 +41,6 @@ const Login = () => {
       isValid = false;
     }
 
-    // Validate Password
     if (!form.password) {
       errors.password = "Password is required.";
       isValid = false;
@@ -39,40 +49,34 @@ const Login = () => {
       isValid = false;
     }
 
+    if (form.password !== form.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+      isValid = false;
+    }
+
     setValidationErrors(errors);
     return isValid;
   };
 
-  const handleLogin = async (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
-    setValidationErrors({}); // Clear validation errors on each submit
+    setValidationErrors({});
 
     if (!validateForm()) return;
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/auth/login",
+        "http://localhost:8000/api/auth/register", 
         form
       );
-      const { token, user } = res.data;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      navigate("/admin/dashboard");
+      const { message } = res.data;
+      alert(message); 
+      navigate("/login"); 
     } catch (err) {
-      const msg = err.response?.data?.message || "Login failed";
+      const msg = err.response?.data?.message || "Sign Up failed";
       setError(msg);
     }
-  };
-
-  const handleForgotPassword = () => {
-    navigate("/forgot-password");
-  };
-
-  const handleSignup = () => {
-    navigate("/signup");
   };
 
   return (
@@ -103,11 +107,48 @@ const Login = () => {
             className="text-center mb-4"
             style={{ fontWeight: 600, color: "#333" }}
           >
-            Welcome Back 👋
+            Create an Account
           </h3>
           {error && <div className="alert alert-danger">{error}</div>}
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSignUp}>
+            <div className="mb-3">
+              <label htmlFor="name" className="form-label">
+                Name
+              </label>
+              <div className="input-group">
+                <span
+                  className="input-group-text"
+                  style={{
+                    backgroundColor: "#6c63ff",
+                    borderColor: "#6c63ff",
+                    color: "#fff",
+                    borderTopLeftRadius: "0.5rem",
+                    borderBottomLeftRadius: "0.5rem",
+                  }}
+                >
+                  <FaUser />
+                </span>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  className="form-control"
+                  placeholder="Your Name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  style={{
+                    fontSize: "16px",
+                    paddingLeft: "1.5rem", 
+                  }}
+                />
+              </div>
+              {validationErrors.name && (
+                <div className="text-danger">{validationErrors.name}</div>
+              )}
+            </div>
+
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -136,7 +177,7 @@ const Login = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", // To make space for the icon
+                    paddingLeft: "1.5rem", 
                   }}
                 />
               </div>
@@ -145,7 +186,7 @@ const Login = () => {
               )}
             </div>
 
-            <div className="mb-4">
+            <div className="mb-3">
               <label htmlFor="password" className="form-label">
                 Password
               </label>
@@ -173,12 +214,51 @@ const Login = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", // To make space for the icon
+                    paddingLeft: "1.5rem", 
                   }}
                 />
               </div>
               {validationErrors.password && (
                 <div className="text-danger">{validationErrors.password}</div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="confirmPassword" className="form-label">
+                Confirm Password
+              </label>
+              <div className="input-group">
+                <span
+                  className="input-group-text"
+                  style={{
+                    backgroundColor: "#6c63ff",
+                    borderColor: "#6c63ff",
+                    color: "#fff",
+                    borderTopLeftRadius: "0.5rem",
+                    borderBottomLeftRadius: "0.5rem",
+                  }}
+                >
+                  <FaLock />
+                </span>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  className="form-control"
+                  placeholder="••••••••"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  style={{
+                    fontSize: "16px",
+                    paddingLeft: "1.5rem", 
+                  }}
+                />
+              </div>
+              {validationErrors.confirmPassword && (
+                <div className="text-danger">
+                  {validationErrors.confirmPassword}
+                </div>
               )}
             </div>
 
@@ -192,44 +272,28 @@ const Login = () => {
                 fontSize: "16px",
               }}
             >
-              Login
+              Sign Up
             </button>
 
-            {/* Forgot Password link */}
+            {/* Redirect to Login */}
             <div className="text-center mt-3">
-              <a
-                href="#!"
-                onClick={handleForgotPassword}
-                style={{
-                  color: "#6c63ff",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                }}
-              >
-                Forgot Password?
-              </a>
-            </div>
-
-            {/* Sign Up link */}
-            <div className="text-center mt-2">
               <p
                 style={{
                   fontSize: "14px",
                   color: "#6c63ff",
                 }}
               >
-                Don't have an account?{" "}
+                Already have an account?{" "}
                 <a
                   href="#!"
-                  onClick={handleSignup}
+                  onClick={() => navigate("/login")}
                   style={{
                     color: "#6c63ff",
                     textDecoration: "none",
                     fontWeight: "bold",
                   }}
                 >
-                  Sign Up
+                  Log In
                 </a>
               </p>
             </div>
@@ -240,4 +304,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
