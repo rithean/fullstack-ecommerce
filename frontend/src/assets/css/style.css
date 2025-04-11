@@ -1,0 +1,15 @@
+:root {
+  --primary-font: "Poppins", san-serif;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--primary-font) !important;
+}
+
+
