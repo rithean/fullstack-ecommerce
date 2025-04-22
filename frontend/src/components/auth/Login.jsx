@@ -1,78 +1,67 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaEnvelope, FaLock } from "react-icons/fa"; // Importing FontAwesome icons
+import { FaEnvelope, FaLock } from "react-icons/fa";
+import { AdminAuthContext } from "../context/AdminAuth";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
+  const { login } = useContext(AdminAuthContext);
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState({
-    email: "",
-    password: "",
-  });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const validateForm = () => {
-    let errors = {};
-    let isValid = true;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    // Validate Email
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!form.email) {
-      errors.email = "Email is required.";
-      isValid = false;
-    } else if (!emailRegex.test(form.email)) {
-      errors.email = "Please enter a valid email address.";
-      isValid = false;
-    }
-
-    // Validate Password
-    if (!form.password) {
-      errors.password = "Password is required.";
-      isValid = false;
-    } else if (form.password.length < 6) {
-      errors.password = "Password must be at least 6 characters.";
-      isValid = false;
-    }
-
-    setValidationErrors(errors);
-    return isValid;
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setValidationErrors({}); // Clear validation errors on each submit
-
-    if (!validateForm()) return;
+  const onSubmit = async (data) => {
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       const res = await axios.post(
         "http://localhost:8000/api/auth/login",
-        form
+        data
       );
-      const { token, user } = res.data;
+      const result = res.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      navigate("/admin/dashboard");
-    } catch (err) {
-      const msg = err.response?.data?.message || "Login failed";
-      setError(msg);
+      if (result.status === true) {
+        const adminInfo = {
+          token: result.token,
+          id: result.user.id,
+          name: result.user.name,
+        };
+        localStorage.setItem("adminInfo", JSON.stringify(adminInfo));
+        login(adminInfo);
+        setSuccessMessage("Login Successful");
+        if (result.user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/");
+        }
+      } else {
+        setErrorMessage(result.error || "An error occurred during login.");
+        toast.error(result.error || "An error occurred during login.");
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
+      console.log(error);
     }
   };
 
   const handleForgotPassword = () => {
-    navigate("/forgot-password");
+    navigate("/auth/forgot-password");
   };
 
   const handleSignup = () => {
-    navigate("/signup");
+    navigate("/auth/signup");
   };
 
   return (
@@ -86,6 +75,7 @@ const Login = () => {
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       }}
     >
+      <ToastContainer />
       <div
         className="card"
         style={{
@@ -105,9 +95,16 @@ const Login = () => {
           >
             Welcome Back 👋
           </h3>
-          {error && <div className="alert alert-danger">{error}</div>}
 
-          <form onSubmit={handleLogin}>
+          {errorMessage && (
+            <div className="alert alert-danger">{errorMessage}</div>
+          )}
+          {successMessage && (
+            <div className="alert alert-success">{successMessage}</div>
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Email Field */}
             <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -127,24 +124,29 @@ const Login = () => {
                 </span>
                 <input
                   type="email"
-                  name="email"
                   id="email"
                   className="form-control"
                   placeholder="example@mail.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value:
+                        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                      message: "Please enter a valid email address",
+                    },
+                  })}
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", // To make space for the icon
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
-              {validationErrors.email && (
-                <div className="text-danger">{validationErrors.email}</div>
+              {errors.email && (
+                <div className="text-danger">{errors.email.message}</div>
               )}
             </div>
 
+            {/* Password Field */}
             <div className="mb-4">
               <label htmlFor="password" className="form-label">
                 Password
@@ -164,24 +166,28 @@ const Login = () => {
                 </span>
                 <input
                   type="password"
-                  name="password"
                   id="password"
                   className="form-control"
                   placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters",
+                    },
+                  })}
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", // To make space for the icon
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
-              {validationErrors.password && (
-                <div className="text-danger">{validationErrors.password}</div>
+              {errors.password && (
+                <div className="text-danger">{errors.password.message}</div>
               )}
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               className="btn btn-primary w-100"
@@ -195,7 +201,7 @@ const Login = () => {
               Login
             </button>
 
-            {/* Forgot Password link */}
+            {/* Forgot Password */}
             <div className="text-center mt-3">
               <a
                 href="#!"
@@ -211,7 +217,7 @@ const Login = () => {
               </a>
             </div>
 
-            {/* Sign Up link */}
+            {/* Signup Redirect */}
             <div className="text-center mt-2">
               <p
                 style={{

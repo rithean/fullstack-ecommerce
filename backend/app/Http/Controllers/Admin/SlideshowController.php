@@ -15,7 +15,7 @@ class SlideshowController extends Controller
      */
     public function index()
     {
-        $slideshow = Slideshow::orderBy('created_at', 'DESC')->get();
+        $slideshow = Slideshow::orderBy('id', 'ASC')->get();
 
         if ($slideshow->isEmpty()) {
             return response()->json([

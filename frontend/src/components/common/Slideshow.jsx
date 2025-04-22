@@ -1,0 +1,44 @@
+import React, { useEffect, useState } from "react";
+import { Carousel } from "react-bootstrap";
+import axios from "axios";
+
+const Slideshow = () => {
+  const [slides, setSlides] = useState([]);
+  const baseUrl = "http://localhost:8000";
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/api/slideshows`);
+        if (res.data.status) {
+          setSlides(res.data.data.filter((slide) => slide.status === 1));
+        }
+      } catch (error) {
+        console.error("Failed to fetch slideshow data", error);
+      }
+    };
+
+    fetchSlides();
+  }, []);
+
+  return (
+    <Carousel fade interval={4000} pause={false}>
+      {slides.map((slide) => (
+        <Carousel.Item key={slide.id}>
+          <img
+            className="d-block w-100 slide-image"
+            src={`${baseUrl}${slide.image}`}
+            alt={slide.title}
+          />
+          <Carousel.Caption className="custom-caption">
+            <h2 className="slide-title">{slide.title}</h2>
+            <h5 className="slide-subtitle">{slide.subtitle}</h5>
+            <p className="slide-description">{slide.description}</p>
+          </Carousel.Caption>
+        </Carousel.Item>
+      ))}
+    </Carousel>
+  );
+};
+
+export default Slideshow;

@@ -1,64 +1,112 @@
 <?php
 
-use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\LogoController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\SlideshowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-use App\Models\Slideshow;
+use App\Http\Controllers\Admin\{
+    BrandController,
+    CategoryController,
+    LogoController,
+    ProductController,
+    SlideshowController
+};
+use App\Http\Controllers\CheckoutController;
 
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/verify-otp', [AuthController::class, 'verifyOTP']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+/*
+|--------------------------------------------------------------------------
+| Auth Routes
+|--------------------------------------------------------------------------
+*/
 
-    Route::middleware(['requireAuth'])->group(function () {
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::delete('/logout', [AuthController::class, 'logout']);
+Route::prefix('auth')->controller(AuthController::class)->group(function () {
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+    Route::post('forgot-password', 'forgotPassword');
+    Route::post('verify-otp', 'verifyOTP');
+    Route::post('reset-password', 'resetPassword');
+
+    Route::middleware('requireAuth')->group(function () {
+        Route::get('me', 'me');
+        Route::delete('logout', 'logout');
     });
 });
 
-Route::prefix('admin')->group(function () {
-    Route::middleware(['requireAuth', 'checkRole:admin'])->group(function () {
-        // Route::resource('categories', CategoryController::class);
-        // Categories Route 
-        Route::get('/categories', [CategoryController::class, 'index']);
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::get('/categories/{id}', [CategoryController::class, 'show']);
-        Route::put('/categories/{id}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+Route::controller(CategoryController::class)->group(function () {
+    Route::get('categories', 'index');
+    Route::get('categories/{id}', 'show');
+});
 
-        // Brand Routes
-        Route::get('/brands', [BrandController::class, 'index']);
-        Route::post('/brands', [BrandController::class, 'store']);
-        Route::get('/brands/{id}', [BrandController::class, 'show']);
-        Route::put('/brands/{id}', [BrandController::class, 'update']);
-        Route::delete('/brands/{id}', [BrandController::class, 'destroy']);
+Route::controller(BrandController::class)->group(function () {
+    Route::get('brands', 'index');
+    Route::get('brands/{id}', 'show');
+});
 
-        // Product routes
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::get('/products/{id}', [ProductController::class, 'show']);
-        Route::put('/products/{id}', [ProductController::class, 'update']);
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+Route::controller(ProductController::class)->group(function () {
+    Route::get('products', 'index');
+    Route::get('products/{id}', 'show');
+    Route::get('products/featured', 'featuredCollections');
+    Route::get('products/best', 'bestCollection');
+    Route::get('products/limited', 'limitedEdition');
+    Route::get('product/banners', 'banners');
+});
 
-        // Slideshow roues
-        Route::get('/slideshows', [SlideshowController::class, 'index']);
-        Route::post('/slideshows', [SlideshowController::class, 'store']);
-        Route::get('/slideshows/{id}', [SlideshowController::class, 'show']);
-        Route::put('/slideshows/{id}', [SlideshowController::class, 'update']);
-        Route::delete('/slideshows/{id}', [SlideshowController::class, 'destroy']);
+Route::controller(SlideshowController::class)->group(function () {
+    Route::get('slideshows', 'index');
+    Route::get('slideshows/{id}', 'show');
+});
 
-        // Logo roues
-        Route::get('/logos', [LogoController::class, 'index']);
-        Route::post('/logos', [LogoController::class, 'store']);
-        Route::get('/logos/{id}', [LogoController::class, 'show']);
-        Route::put('/logos/{id}', [LogoController::class, 'update']);
-        Route::delete('/logos/{id}', [LogoController::class, 'destroy']);
+Route::controller(LogoController::class)->group(function () {
+    Route::get('logos', 'index');
+    Route::get('logos/{id}', 'show');
+});
 
+Route::post('/checkout', [CheckoutController::class, 'checkout']);
+
+Route::post('/verify-payment', [CheckoutController::class, 'verifyPayment']);
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes (Protected)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->middleware(['requireAuth', 'checkRole:admin'])->group(function () {
+
+    // Categories
+    Route::controller(CategoryController::class)->group(function () {
+        Route::post('categories', 'store');
+        Route::put('categories/{id}', 'update');
+        Route::delete('categories/{id}', 'destroy');
+    });
+
+    // Brands
+    Route::controller(BrandController::class)->group(function () {
+        Route::post('brands', 'store');
+        Route::put('brands/{id}', 'update');
+        Route::delete('brands/{id}', 'destroy');
+    });
+
+    // Products
+    Route::controller(ProductController::class)->group(function () {
+        Route::post('products', 'store');
+        Route::put('products/{id}', 'update');
+        Route::delete('products/{id}', 'destroy');
+    });
+
+    // Slideshows
+    Route::controller(SlideshowController::class)->group(function () {
+        Route::post('slideshows', 'store');
+        Route::put('slideshows/{id}', 'update');
+        Route::delete('slideshows/{id}', 'destroy');
+    });
+
+    // Logos
+    Route::controller(LogoController::class)->group(function () {
+        Route::post('logos', 'store');
+        Route::put('logos/{id}', 'update');
+        Route::delete('logos/{id}', 'destroy');
     });
 });

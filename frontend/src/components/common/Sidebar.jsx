@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import {
   FaTachometerAlt,
@@ -8,14 +8,19 @@ import {
   FaImages,
   FaImage,
 } from "react-icons/fa";
+import { AdminAuthContext } from "../context/AdminAuth";
 
 const Sidebar = () => {
+  const { logout } = useContext(AdminAuthContext);
+
   return (
     <div className="d-flex flex-column bg-dark text-white vh-100 p-3">
       <div className="mb-4">
         <h3 className="text-white">Admin Panel</h3>
       </div>
-      <ul className="nav flex-column">
+      <ul className="nav flex-column mb-auto">
+        {" "}
+        {/* Use mb-auto to push items to the top */}
         <li className="nav-item mb-2">
           <Link
             to="/admin/dashboard"
@@ -65,6 +70,12 @@ const Sidebar = () => {
           </Link>
         </li>
       </ul>
+      <div className="mt-auto">
+        {" "}
+        <button className="btn btn-danger w-100" onClick={logout}>
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
