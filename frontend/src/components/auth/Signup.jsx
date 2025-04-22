@@ -72,7 +72,7 @@ const SignUp = () => {
       );
       const { message } = res.data;
       alert(message); 
-      navigate("/login"); 
+      navigate("/auth/login"); 
     } catch (err) {
       const msg = err.response?.data?.message || "Sign Up failed";
       setError(msg);
@@ -140,7 +140,7 @@ const SignUp = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", 
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
@@ -177,7 +177,7 @@ const SignUp = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", 
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
@@ -214,7 +214,7 @@ const SignUp = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", 
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
@@ -251,7 +251,7 @@ const SignUp = () => {
                   required
                   style={{
                     fontSize: "16px",
-                    paddingLeft: "1.5rem", 
+                    paddingLeft: "1.5rem",
                   }}
                 />
               </div>
@@ -286,7 +286,7 @@ const SignUp = () => {
                 Already have an account?{" "}
                 <a
                   href="#!"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/auth/login")}
                   style={{
                     color: "#6c63ff",
                     textDecoration: "none",

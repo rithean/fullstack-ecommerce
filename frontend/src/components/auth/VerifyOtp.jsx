@@ -16,7 +16,7 @@ const VerifyOtp = () => {
     if (location.state?.email) {
       setEmail(location.state.email);
     } else {
-      navigate("/forgot-password");
+      navigate("/auth/forgot-password");
     }
   }, [location.state, navigate]);
 
@@ -75,7 +75,7 @@ const VerifyOtp = () => {
       setStatus(res.data.message || "OTP verified successfully.");
       setTimeout(() => {
         setLoading(false);
-        navigate("/reset-password", { state: { email, otp: fullOtp } });
+        navigate("/auth/reset-password", { state: { email, otp: fullOtp } });
       }, 1500);
     } catch (err) {
       const msg = err.response?.data?.message || "Invalid OTP.";

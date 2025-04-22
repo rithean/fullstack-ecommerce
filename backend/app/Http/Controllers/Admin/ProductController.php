@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
+use App\Models\Collection;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -10,19 +12,37 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['category', 'brand'])->orderBy('created_at', 'DESC')->get();
+        $query = Product::with(['category', 'brand']);
 
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Product is empty'
-            ], 404);
+        // Search by name or description
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
+
+        // Filter by category
+        if ($categoryId = $request->input('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        // Filter by brand
+        if ($brandId = $request->input('brand_id')) {
+            $query->where('brand_id', $brandId);
+        }
+
+        // Sort by field
+        $sortBy = $request->input('sort_by', 'id'); // default is id
+        $sortDir = $request->input('sort_dir', 'asc'); // default is ascending
+
+        $query->orderBy($sortBy, $sortDir);
+
+        // Pagination
+        $perPage = $request->input('per_page', 10);
+        $products = $query->paginate($perPage);
 
         return response()->json([
             'status' => true,
@@ -30,9 +50,63 @@ class ProductController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+    public function featuredCollections()
+    {
+        $collections = Collection::where('is_featured', 1)->get();
+
+        if ($collections->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No featured Collections'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $collections
+        ], 200);
+    }
+
+    public function banners()
+    {
+        $banners = Banner::all();
+
+        if ($banners->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No banners found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $banners
+        ], 200);
+    }
+
+    public function bestCollection()
+    {
+        $products = Product::with(['category', 'brand'])->where('is_best', 1)->get();
+
+        if ($products->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No best collection found'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $products], 200);
+    }
+
+    public function limitedEdition()
+    {
+        $products = Product::with(['category', 'brand'])->where('is_limited', 1)->get();
+
+        if ($products->isEmpty()) {
+            return response()->json(['status' => false, 'message' => 'No limited edition products found'], 404);
+        }
+
+        return response()->json(['status' => true, 'data' => $products], 200);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -65,13 +139,10 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product created successfully.',
+            'message' => 'Product created successfully.'
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $product = Product::with(['category', 'brand'])->find($id);
@@ -89,9 +160,6 @@ class ProductController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $product = Product::find($id);
@@ -138,13 +206,10 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product updated successfully.',
+            'message' => 'Product updated successfully.'
         ], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $product = Product::find($id);
@@ -164,7 +229,7 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product deleted successfully.',
+            'message' => 'Product deleted successfully.'
         ], 200);
     }
 }

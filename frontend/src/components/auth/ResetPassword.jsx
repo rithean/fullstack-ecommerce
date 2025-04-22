@@ -14,12 +14,11 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Get email and OTP passed via navigate state from VerifyOtp page
     if (location.state?.email && location.state?.otp) {
       setEmail(location.state.email);
-      setOtp(location.state.otp); // OTP is used but not visible to the user
+      setOtp(location.state.otp);
     } else {
-      navigate("/forgot-password"); // Redirect back if no email or OTP
+      navigate("/auth/forgot-password"); 
     }
   }, [location.state, navigate]);
 
@@ -28,7 +27,6 @@ const ResetPassword = () => {
     setStatus("");
     setError("");
 
-    // Check if passwords match
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -36,12 +34,11 @@ const ResetPassword = () => {
 
     setLoading(true);
 
-    // Construct the payload for password reset
     const payload = {
       email,
       password: newPassword,
       password_confirmation: confirmPassword,
-      otp, // Send OTP in the request, even though it's not visible
+      otp,
     };
 
     try {
@@ -53,7 +50,7 @@ const ResetPassword = () => {
 
       setTimeout(() => {
         setLoading(false);
-        navigate("/login"); // Redirect to login after reset
+        navigate("/auth/login"); 
       }, 1500);
     } catch (err) {
       const msg = err.response?.data?.message || "Password reset failed.";

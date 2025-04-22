@@ -8,11 +8,10 @@ const Brand = () => {
   const [brands, setBrands] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [brandName, setBrandName] = useState("");
-  const [status, setStatus] = useState(1); // Default status is 1 (active)
-  const [editMode, setEditMode] = useState(false); // To track whether it's Create or Edit
-  const [currentBrandId, setCurrentBrandId] = useState(null); // Track current brand's ID for editing
+  const [status, setStatus] = useState(1);
+  const [editMode, setEditMode] = useState(false); 
+  const [currentBrandId, setCurrentBrandId] = useState(null); 
 
-  // Function to fetch brands
   const fetchBrands = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -28,7 +27,7 @@ const Brand = () => {
       };
 
       const res = await axios.get(
-        "http://localhost:8000/api/admin/brands",
+        "http://localhost:8000/api/brands",
         config
       );
 

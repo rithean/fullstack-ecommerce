@@ -25,7 +25,7 @@ const ForgotPassword = () => {
       setStatus(res.data.message || "Password reset link has been sent.");
       setTimeout(() => {
         setLoading(false);
-        navigate("/verify-otp", { state: { email } });
+        navigate("/auth/verify-otp", { state: { email } });
       }, 1500);
     } catch (err) {
       const msg = err.response?.data?.message || "Something went wrong.";
@@ -135,7 +135,7 @@ const ForgotPassword = () => {
                 Remember your password?{" "}
                 <a
                   href="#!"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/auth/login")}
                   style={{
                     color: "#6c63ff",
                     textDecoration: "none",
