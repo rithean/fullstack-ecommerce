@@ -17,6 +17,9 @@ import About from "./components/About";
 import Contact from "./components/Contact";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
+import Product from "./components/admin/products/Product";
+import Slideshow from "./components/admin/slideshow/Slideshow";
+import Logo from "./components/admin/logo/Logo";
 
 const App = () => {
   return (
@@ -60,6 +63,29 @@ const App = () => {
               </AdminRequireAuth>
             }
           />
+          <Route
+            path="/admin/products"
+            element={
+              <AdminRequireAuth>
+                <Product />
+              </AdminRequireAuth>
+            }
+          />
+
+          <Route
+            path="/admin/slideshows"
+            element={
+              <AdminRequireAuth>
+                <Slideshow />
+              </AdminRequireAuth>
+            }
+          />
+
+          <Route path="/admin/logos" element={
+            <AdminRequireAuth>
+              <Logo />
+            </AdminRequireAuth>
+          } />
         </Routes>
       </BrowserRouter>
       <ToastContainer />

@@ -1,57 +1,43 @@
 import React, { useState, useEffect } from "react";
-import AdminLayout from "../../common/layouts/AdminLayout";
 import axios from "axios";
+import AdminLayout from "../../common/layouts/AdminLayout";
+import { Pencil, Trash } from "react-bootstrap-icons";
 
 const Category = () => {
   const [categories, setCategories] = useState([]);
+  const [form, setForm] = useState({ name: "", status: 1 });
   const [showModal, setShowModal] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [status, setStatus] = useState(1);
   const [editMode, setEditMode] = useState(false);
-  const [currentCategoryId, setCurrentCategoryId] = useState(null);
-
-  const fetchCategories = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:8000/api/categories",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCategories(Array.isArray(res.data.data) ? res.data.data : []);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
-  };
+  const [currentId, setCurrentId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id) => {
+  const fetchCategories = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8000/api/admin/categories/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      if (!adminInfo?.token) return console.error("Token missing");
+
+      const res = await axios.get("http://localhost:8000/api/categories", {
+        headers: { Authorization: `Bearer ${adminInfo.token}` },
       });
-      setCategories(categories.filter((item) => item._id !== id));
+
+      setCategories(res.data.data || []);
     } catch (err) {
-      console.error("Error deleting category:", err);
+      console.error("Fetch error:", err.response || err);
     }
   };
 
   const handleModalShow = (category = null) => {
     if (category) {
       setEditMode(true);
-      setCurrentCategoryId(category.id);
-      setCategoryName(category.name);
-      setStatus(category.status);
+      setCurrentId(category.id);
+      setForm({ name: category.name, status: category.status });
     } else {
       setEditMode(false);
-      setCurrentCategoryId(null);
-      setCategoryName("");
-      setStatus(1);
+      setCurrentId(null);
+      setForm({ name: "", status: 1 });
     }
     setShowModal(true);
   };
@@ -59,30 +45,34 @@ const Category = () => {
   const handleModalClose = () => {
     setShowModal(false);
     setEditMode(false);
-    setCurrentCategoryId(null);
-    setCategoryName("");
-    setStatus(1);
+    setCurrentId(null);
+    setForm({ name: "", status: 1 });
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      if (!adminInfo?.token) return console.error("Token missing");
+
       const config = {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${adminInfo.token}` },
       };
-      const categoryData = { name: categoryName, status };
 
       if (editMode) {
         await axios.put(
-          `http://localhost:8000/api/admin/categories/${currentCategoryId}`,
-          categoryData,
+          `http://localhost:8000/api/admin/categories/${currentId}`,
+          form,
           config
         );
       } else {
         await axios.post(
-          "http://localhost:8000/api/admin/categories",
-          categoryData,
+          `http://localhost:8000/api/admin/categories`,
+          form,
           config
         );
       }
@@ -90,124 +80,142 @@ const Category = () => {
       handleModalClose();
       fetchCategories();
     } catch (err) {
-      console.error("Error saving category:", err);
+      console.error("Submit error:", err.response || err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      if (!adminInfo?.token) return console.error("Token missing");
+
+      await axios.delete(`http://localhost:8000/api/admin/categories/${id}`, {
+        headers: { Authorization: `Bearer ${adminInfo.token}` },
+      });
+
+      fetchCategories();
+    } catch (err) {
+      console.error("Delete error:", err.response || err);
     }
   };
 
   return (
     <AdminLayout>
-      <h2 className="mb-4">All Categories</h2>
-      <button
-        className="btn btn-primary mb-3 rounded-pill px-4 py-2 shadow-sm"
-        onClick={() => handleModalShow()}
-      >
-        <i className="bi bi-plus-circle me-2"></i>Create New
-      </button>
-
-      <div className="table-responsive">
-        <table className="table table-bordered table-striped shadow-sm rounded text-center">
-          <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.name}</td>
-                <td>
-                  <span
-                    className={`badge text-uppercase ${
-                      item.status === 1 ? "bg-success" : "bg-secondary"
-                    }`}
-                  >
-                    {item.status === 1 ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-warning btn-sm me-2 rounded-pill text-white"
-                    onClick={() => handleModalShow(item)}
-                  >
-                    <i className="bi bi-pencil-square"></i> Edit
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm rounded-pill"
-                    onClick={() => handleDelete(item._id)}
-                  >
-                    <i className="bi bi-trash"></i> Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Bootstrap Modal */}
-      {showModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex="-1"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      <div className="container mt-4">
+        <h2>Category Management</h2>
+        <button
+          className="btn btn-primary my-3"
+          onClick={() => handleModalShow()}
         >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content shadow">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editMode ? "Edit Category" : "Create Category"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleModalClose}
-                ></button>
-              </div>
-              <form onSubmit={handleSubmit}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Category Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={categoryName}
-                      onChange={(e) => setCategoryName(e.target.value)}
-                      required
-                    />
+          + Create New
+        </button>
+
+        <div className="table-responsive">
+          <table className="table table-bordered text-center">
+            <thead className="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.length > 0 ? (
+                categories.map((category) => (
+                  <tr key={category.id}>
+                    <td>{category.id}</td>
+                    <td>{category.name}</td>
+                    <td>{category.status === 1 ? "Active" : "Inactive"}</td>
+                    <td>
+                      <div className="d-flex justify-content-center">
+                        <button
+                          className="btn btn-warning btn-sm me-2"
+                          onClick={() => handleModalShow(category)}
+                        >
+                          <Pencil />
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDelete(category.id)}
+                        >
+                          <Trash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">No categories found.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div
+            className="modal fade show d-block"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <form onSubmit={handleSubmit}>
+                  <div className="modal-header">
+                    <h5 className="modal-title">
+                      {editMode ? "Edit Category" : "Create Category"}
+                    </h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={handleModalClose}
+                    ></button>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Status</label>
-                    <select
-                      className="form-select"
-                      value={status}
-                      onChange={(e) => setStatus(Number(e.target.value))}
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label className="form-label">Category Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        className="form-control"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label">Status</label>
+                      <select
+                        name="status"
+                        className="form-control"
+                        value={form.status}
+                        onChange={handleChange}
+                      >
+                        <option value={1}>Active</option>
+                        <option value={2}>Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="submit" className="btn btn-primary">
+                      {editMode ? "Update" : "Create"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleModalClose}
                     >
-                      <option value={1}>Active</option>
-                      <option value={2}>Inactive</option>
-                    </select>
+                      Cancel
+                    </button>
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleModalClose}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editMode ? "Update" : "Create"}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </AdminLayout>
   );
 };

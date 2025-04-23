@@ -16,31 +16,25 @@ class ProductController extends Controller
     {
         $query = Product::with(['category', 'brand']);
 
-        // Search by name or description
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        // Filter by category
         if ($categoryId = $request->input('category_id')) {
             $query->where('category_id', $categoryId);
         }
 
-        // Filter by brand
         if ($brandId = $request->input('brand_id')) {
             $query->where('brand_id', $brandId);
         }
 
-        // Sort by field
-        $sortBy = $request->input('sort_by', 'id'); // default is id
-        $sortDir = $request->input('sort_dir', 'asc'); // default is ascending
-
+        $sortBy = $request->input('sort_by', 'id');
+        $sortDir = $request->input('sort_dir', 'asc');
         $query->orderBy($sortBy, $sortDir);
 
-        // Pagination
         $perPage = $request->input('per_page', 10);
         $products = $query->paginate($perPage);
 
@@ -49,7 +43,6 @@ class ProductController extends Controller
             'data' => $products
         ], 200);
     }
-
 
     public function featuredCollections()
     {
@@ -118,6 +111,10 @@ class ProductController extends Controller
             'status'       => 'nullable|in:0,1',
             'category_id'  => 'required|exists:categories,id',
             'brand_id'     => 'required|exists:brands,id',
+            'is_best'      => 'nullable|boolean',
+            'is_limited'   => 'nullable|boolean',
+            'is_banner'    => 'nullable|boolean',
+            'is_featured'  => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -127,7 +124,10 @@ class ProductController extends Controller
             ], 422);
         }
 
-        $data = $request->only(['name', 'price', 'qty', 'description', 'status', 'category_id', 'brand_id']);
+        $data = $request->only([
+            'name', 'price', 'qty', 'description', 'status',
+            'category_id', 'brand_id', 'is_best', 'is_limited', 'is_banner', 'is_featured'
+        ]);
 
         if ($request->hasFile('image')) {
             $filename = time() . '_' . $request->file('image')->getClientOriginalName();
@@ -180,6 +180,10 @@ class ProductController extends Controller
             'status'      => 'nullable|in:0,1',
             'category_id' => 'sometimes|required|exists:categories,id',
             'brand_id'    => 'sometimes|required|exists:brands,id',
+            'is_best'     => 'nullable|boolean',
+            'is_limited'  => 'nullable|boolean',
+            'is_banner'   => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -189,16 +193,18 @@ class ProductController extends Controller
             ], 422);
         }
 
-        $data = $request->only(['name', 'price', 'qty', 'description', 'status', 'category_id', 'brand_id']);
+        $data = $request->only([
+            'name', 'price', 'qty', 'description', 'status',
+            'category_id', 'brand_id', 'is_best', 'is_limited', 'is_banner', 'is_featured'
+        ]);
 
         if ($request->hasFile('image')) {
             if ($product->image) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $product->image));
             }
 
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('uploads/products', $filename, 'public');
+            $filename = time() . '_' . $request->file('image')->getClientOriginalName();
+            $path = $request->file('image')->storeAs('uploads/products', $filename, 'public');
             $data['image'] = '/storage/' . $path;
         }
 

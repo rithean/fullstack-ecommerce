@@ -47,7 +47,7 @@ const Sidebar = () => {
         </li>
         <li className="nav-item mb-2">
           <Link
-            to="/products"
+            to="/admin/products"
             className="nav-link text-white d-flex align-items-center"
           >
             <FaBoxes className="me-2" /> Products
@@ -55,7 +55,7 @@ const Sidebar = () => {
         </li>
         <li className="nav-item mb-2">
           <Link
-            to="/slideshows"
+            to="/admin/slideshows"
             className="nav-link text-white d-flex align-items-center"
           >
             <FaImages className="me-2" /> Slideshows
@@ -63,7 +63,7 @@ const Sidebar = () => {
         </li>
         <li className="nav-item">
           <Link
-            to="/logos"
+            to="/admin/logos"
             className="nav-link text-white d-flex align-items-center"
           >
             <FaImage className="me-2" /> Logos

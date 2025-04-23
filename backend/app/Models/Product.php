@@ -18,7 +18,11 @@ class Product extends Model
         'image',
         'status',
         'category_id',
-        'brand_id'
+        'brand_id',
+        'is_best',
+        'is_limited',
+        'is_banner',
+        'is_featured'
     ];
 
     public function category() 
