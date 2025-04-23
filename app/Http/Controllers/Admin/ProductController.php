@@ -65,7 +65,7 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product created successfully.',
+            'message' => 'Product created successfully!',
         ], 201);
     }
 
@@ -138,7 +138,7 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product updated successfully.',
+            'message' => 'Product updated successfully!',
         ], 200);
     }
 
@@ -164,7 +164,7 @@ class ProductController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Product deleted successfully.',
+            'message' => 'Product deleted successfully!',
         ], 200);
     }
 }
