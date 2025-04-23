@@ -62,7 +62,7 @@ class LogoController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Logo uploaded successfully.',
+            'message' => 'Logo uploaded successfully!',
         ], 201);
     }
 
