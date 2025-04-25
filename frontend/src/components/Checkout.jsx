@@ -1,232 +1,178 @@
-import React, { useState, useEffect } from "react";
-import { Table, Button, Row, Col, Form, Spinner } from "react-bootstrap";
-import { useCart } from "./context/CartContext";
-import ClientLayout from "./common/layouts/ClientLayout";
-import { FaTimes } from "react-icons/fa";
-import axios from "axios";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import React, { useContext, useState } from "react";
+import { Form, Button, Card, Row, Col } from "react-bootstrap";
+import { CartContext } from "./context/CartContext";
 import { BaseUrl } from "./common/BaseUrl";
+import axios from "axios";
+import ClientLayout from "./common/layouts/ClientLayout";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; 
 
 const Checkout = () => {
-  const { cartItems, removeItem, clearCart } = useCart();
+  const getToken = () => {
+    const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+    return adminInfo?.token || "";
+  };
+
+  const navigate = useNavigate();
+
+  const { cartData, clearCart } = useContext(CartContext);
   const [form, setForm] = useState({
     name: "",
-    address: "",
-    phone: "",
     email: "",
+    address: "",
+    discount: 0,
+    shipping: 5,
+    payment_status: "not paid",
+    status: "pending",
   });
-  const [showPayPal, setShowPayPal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [clientId, setClientId] = useState(""); 
 
-  useEffect(() => {
-    setClientId(
-      "AfoGBDV7ALjR749En8LgdzKhSBJ9zuBChk6Rat_WFVL1VU9i4-xJtHO-YxiJ_ESCHrxf3wvGsgCOAIOu"
-    ); 
-  }, []);
+  const subtotal = cartData.reduce(
+    (acc, item) => acc + Number(item.price) * item.qty,
+    0
+  );
+  const total = subtotal + form.shipping - form.discount;
 
-  const total = cartItems
-    .reduce((acc, item) => acc + item.price * item.quantity, 0)
-    .toFixed(2);
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCheckoutDetails = () => {
-    if (!form.name || !form.address || !form.phone || !form.email) {
-      alert("Please fill in all shipping information");
+  const handleOrderSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.name || !form.email || !form.address) {
+      alert("Please fill all the required fields.");
       return;
     }
-    setShowPayPal(true);
-  };
 
-  const handlePaymentSuccess = async (details) => {
+    const payload = {
+      ...form,
+      subtotal,
+      cart: cartData.map((item) => ({
+        product_id: item.product_id,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+      })),
+    };
+
     try {
-      setLoading(true);
-      console.log("Payment details:", details);
-
-      await axios.post(`${BaseUrl}/api/checkout`, {
-        ...form,
-        user_id: 1,
-        total_price: total,
-        items: cartItems.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity,
-        })),
-        payment_details: details,
+      const res = await axios.post(`${BaseUrl}/api/orders`, payload, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       });
 
-      alert("Payment completed! Order saved.");
-      clearCart();
+      console.log("Order Response:", res.data);
+
+      toast.success("Order placed successfully!");
+      alert("Order placed successfully!");
+
+      setTimeout(() => {
+        clearCart();
+        navigate("/");
+      }, 2000);
     } catch (err) {
-      console.error("Error sending order to backend", err);
-      alert("Error storing order.");
-    } finally {
-      setLoading(false);
+      console.error(err.response?.data || err.message);
+      toast.error("Failed to place order. Please try again later.");
     }
   };
 
   return (
     <ClientLayout>
-      <div className="container py-5">
-        <h3 className="text-center mb-4 fw-bold">Checkout</h3>
+      <div className="container my-5">
+        <h2 className="text-center mb-4">Checkout</h2>
 
-        {cartItems.length === 0 ? (
-          <div className="text-center text-muted">
-            <p>Your cart is empty. Please add items before checking out.</p>
-          </div>
-        ) : (
-          <>
-            {/* Cart Table */}
-            <Table
-              striped
-              bordered
-              hover
-              responsive
-              className="cart-table rounded"
-            >
-              <thead className="bg-primary text-white">
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Qty</th>
-                  <th>Total</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="me-3"
-                          style={{ width: "50px", height: "50px" }}
-                        />
-                        {item.name}
-                      </div>
-                    </td>
-                    <td>${item.price}</td>
-                    <td>{item.quantity}</td>
-                    <td>${(item.price * item.quantity).toFixed(2)}</td>
-                    <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <FaTimes />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td colSpan="3" className="text-end fw-bold">
-                    Total:
-                  </td>
-                  <td colSpan="2" className="fw-bold">
-                    ${total}
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
-
-            {/* Shipping Form */}
-            <Row className="mt-4">
-              <Col md={6}>
-                <h4>Shipping Info</h4>
-                <Form>
+        <Row className="justify-content-center">
+          {/* Order Form */}
+          <Col md={7}>
+            <Card className="shadow-sm border-0 rounded-lg mb-4">
+              <Card.Body>
+                <h5 className="mb-3">Shipping Information</h5>
+                <Form onSubmit={handleOrderSubmit}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Name</Form.Label>
+                    <Form.Label>Full Name</Form.Label>
                     <Form.Control
+                      type="text"
                       name="name"
                       value={form.name}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
+                      required
                     />
                   </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Address</Form.Label>
-                    <Form.Control
-                      name="address"
-                      value={form.address}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Phone</Form.Label>
-                    <Form.Control
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleInputChange}
-                    />
-                  </Form.Group>
+
                   <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
                     <Form.Control
-                      name="email"
                       type="email"
+                      name="email"
                       value={form.email}
-                      onChange={handleInputChange}
+                      onChange={handleChange}
+                      required
                     />
                   </Form.Group>
-                  <Button
-                    variant="success"
-                    className="w-100"
-                    onClick={handleCheckoutDetails}
-                  >
-                    Continue to PayPal
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Address</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      name="address"
+                      value={form.address}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Button type="submit" variant="success" className="w-100">
+                    Place Order
                   </Button>
                 </Form>
-              </Col>
+              </Card.Body>
+            </Card>
+          </Col>
 
-              {/* PayPal Button */}
-              {showPayPal && (
-                <Col md={6} className="mt-4">
-                  {loading ? (
-                    <div className="d-flex justify-content-center">
-                      <Spinner animation="border" />
+          {/* Order Summary */}
+          <Col md={5}>
+            <Card className="shadow-sm border-0 rounded-lg">
+              <Card.Body>
+                <h5 className="text-center">Order Summary</h5>
+                <hr />
+                {cartData.map((item) => (
+                  <div
+                    key={item.id}
+                    className="d-flex justify-content-between mb-2"
+                  >
+                    <div>
+                      {item.name}{" "}
+                      <span className="text-muted">x{item.qty}</span>
                     </div>
-                  ) : (
-                    clientId && (
-                      <PayPalScriptProvider
-                        options={{
-                          "client-id": clientId,
-                          currency: "USD",
-                        }}
-                      >
-                        <PayPalButtons
-                          style={{ layout: "vertical" }}
-                          createOrder={(data, actions) =>
-                            actions.order.create({
-                              purchase_units: [
-                                {
-                                  amount: {
-                                    value: total,
-                                  },
-                                },
-                              ],
-                            })
-                          }
-                          onApprove={async (data, actions) => {
-                            const details = await actions.order.capture();
-                            handlePaymentSuccess(details);
-                          }}
-                          onError={(err) => {
-                            console.error("PayPal error", err);
-                            alert("Payment failed!");
-                          }}
-                        />
-                      </PayPalScriptProvider>
-                    )
-                  )}
-                </Col>
-              )}
-            </Row>
-          </>
-        )}
+                    <div>${(item.price * item.qty).toFixed(2)}</div>
+                  </div>
+                ))}
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Shipping</span>
+                  <span>${form.shipping.toFixed(2)}</span>
+                </div>
+                <div className="d-flex justify-content-between">
+                  <span>Discount</span>
+                  <span>-${form.discount.toFixed(2)}</span>
+                </div>
+                <hr />
+                <div className="d-flex justify-content-between fw-bold">
+                  <span>Total</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </ClientLayout>
   );

@@ -14,11 +14,15 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('order_number')->unique();
+            $table->decimal('subtotal', 10, 2);
+            $table->decimal('shipping', 10, 2);
+            $table->decimal('discount', 10, 2)->nullable();
+            $table->enum('payment_status', ['paid', 'not paid'])->default('not paid');
+            $table->enum('status', ['pending', 'shipping', 'delivered', 'cancelled'])->default('pending');
             $table->string('name');
-            $table->string('address');
-            $table->string('phone');
             $table->string('email');
-            $table->decimal('total_price', 10, 2);
+            $table->string('address');
             $table->timestamps();
         });
     }

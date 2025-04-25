@@ -5,11 +5,12 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\{
     BrandController,
     CategoryController,
+    CollectionController,
     LogoController,
     ProductController,
     SlideshowController
 };
-use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Api\OrderController;
 
 /*
 |----------------------------------------------------------------------
@@ -44,10 +45,14 @@ Route::get('brands/{id}', [BrandController::class, 'show']);
 
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/{id}', [ProductController::class, 'show']);
-Route::get('products/featured', [ProductController::class, 'featuredCollections']);
-Route::get('products/best', [ProductController::class, 'bestCollection']);
-Route::get('products/limited', [ProductController::class, 'limitedEdition']);
-Route::get('product/banners', [ProductController::class, 'banners']);
+Route::get('trending', [ProductController::class, 'trendingProduct']);
+Route::get('limited', [ProductController::class, 'limitedEdition']);
+
+Route::get('collections', [CollectionController::class, 'index']);
+Route::get('collections/{id}', [CollectionController::class, 'show']);
+Route::get('featured', [CollectionController::class, 'featuredCollections']);
+Route::get('best', [CollectionController::class, 'bestCollections']);
+Route::get('discount', [CollectionController::class, 'discountCollections']);
 
 Route::get('slideshows', [SlideshowController::class, 'index']);
 Route::get('slideshows/{id}', [SlideshowController::class, 'show']);
@@ -55,8 +60,11 @@ Route::get('slideshows/{id}', [SlideshowController::class, 'show']);
 Route::get('logos', [LogoController::class, 'index']);
 Route::get('logos/{id}', [LogoController::class, 'show']);
 
-Route::post('/checkout', [CheckoutController::class, 'checkout']);
-Route::post('/verify-payment', [CheckoutController::class, 'verifyPayment']);
+Route::middleware('requireAuth')->group(function () {
+    Route::post('orders', [OrderController::class, 'saveOrder']);
+    Route::get('orders', [OrderController::class, 'myOrders']); 
+    Route::get('orders/{id}', [OrderController::class, 'show']); 
+});
 
 /*
 |----------------------------------------------------------------------
@@ -90,4 +98,14 @@ Route::prefix('admin')->middleware(['requireAuth', 'checkRole:admin'])->group(fu
     Route::post('logos', [LogoController::class, 'store']);
     Route::put('logos/{id}', [LogoController::class, 'update']);
     Route::delete('logos/{id}', [LogoController::class, 'destroy']);
+
+    // Slideshows
+    Route::post('collections', [CollectionController::class, 'store']);
+    Route::put('collections/{id}', [CollectionController::class, 'update']);
+    Route::delete('collections/{id}', [CollectionController::class, 'destroy']);
+
+    // Order
+    Route::get('orders', [OrderController::class, 'index']);    
+    Route::put('orders/{id}', [OrderController::class, 'update']); 
+    Route::delete('orders/{id}', [OrderController::class, 'destroy']);
 });

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Banner;
-use App\Models\Collection;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +17,7 @@ class ProductController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -35,7 +33,7 @@ class ProductController extends Controller
         $sortDir = $request->input('sort_dir', 'asc');
         $query->orderBy($sortBy, $sortDir);
 
-        $perPage = $request->input('per_page', 10);
+        $perPage = $request->input('per_page', 6);
         $products = $query->paginate($perPage);
 
         return response()->json([
@@ -44,60 +42,30 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function featuredCollections()
+    public function trendingProduct()
     {
-        $collections = Collection::where('is_featured', 1)->get();
-
-        if ($collections->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No featured Collections'
-            ], 404);
-        }
+        $products = Product::orderBy('created_at', 'DESC')
+            ->where('is_trending', 1)
+            ->limit(4)
+            ->get();
 
         return response()->json([
             'status' => true,
-            'data' => $collections
+            'data' => $products
         ], 200);
-    }
-
-    public function banners()
-    {
-        $banners = Banner::all();
-
-        if ($banners->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No banners found'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'data' => $banners
-        ], 200);
-    }
-
-    public function bestCollection()
-    {
-        $products = Product::with(['category', 'brand'])->where('is_best', 1)->get();
-
-        if ($products->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'No best collection found'], 404);
-        }
-
-        return response()->json(['status' => true, 'data' => $products], 200);
     }
 
     public function limitedEdition()
     {
-        $products = Product::with(['category', 'brand'])->where('is_limited', 1)->get();
+        $products = Product::orderBy('id', 'ASC')
+            ->where('is_limited', 1)
+            ->limit(12)
+            ->get();
 
-        if ($products->isEmpty()) {
-            return response()->json(['status' => false, 'message' => 'No limited edition products found'], 404);
-        }
-
-        return response()->json(['status' => true, 'data' => $products], 200);
+        return response()->json([
+            'status' => true,
+            'data' => $products
+        ], 200);
     }
 
     public function store(Request $request)
@@ -111,10 +79,8 @@ class ProductController extends Controller
             'status'       => 'nullable|in:0,1',
             'category_id'  => 'required|exists:categories,id',
             'brand_id'     => 'required|exists:brands,id',
-            'is_best'      => 'nullable|boolean',
-            'is_limited'   => 'nullable|boolean',
-            'is_banner'    => 'nullable|boolean',
-            'is_featured'  => 'nullable|boolean',
+            'is_trending'   => 'nullable|in:0,1',
+            'is_limited'   => 'nullable|in:0,1',
         ]);
 
         if ($validator->fails()) {
@@ -125,8 +91,15 @@ class ProductController extends Controller
         }
 
         $data = $request->only([
-            'name', 'price', 'qty', 'description', 'status',
-            'category_id', 'brand_id', 'is_best', 'is_limited', 'is_banner', 'is_featured'
+            'name',
+            'price',
+            'qty',
+            'description',
+            'status',
+            'category_id',
+            'brand_id',
+            'is_trending',
+            'is_limited',
         ]);
 
         if ($request->hasFile('image')) {
@@ -180,10 +153,8 @@ class ProductController extends Controller
             'status'      => 'nullable|in:0,1',
             'category_id' => 'sometimes|required|exists:categories,id',
             'brand_id'    => 'sometimes|required|exists:brands,id',
-            'is_best'     => 'nullable|boolean',
-            'is_limited'  => 'nullable|boolean',
-            'is_banner'   => 'nullable|boolean',
-            'is_featured' => 'nullable|boolean',
+            'is_trending'  => 'nullable|in:0,1',
+            'is_limited'  => 'nullable|in:0,1',
         ]);
 
         if ($validator->fails()) {
@@ -194,8 +165,15 @@ class ProductController extends Controller
         }
 
         $data = $request->only([
-            'name', 'price', 'qty', 'description', 'status',
-            'category_id', 'brand_id', 'is_best', 'is_limited', 'is_banner', 'is_featured'
+            'name',
+            'price',
+            'qty',
+            'description',
+            'status',
+            'category_id',
+            'brand_id',
+            'is_trending',
+            'is_limited',
         ]);
 
         if ($request->hasFile('image')) {

@@ -1,128 +1,124 @@
-import React from "react";
-import { Table, Button, Row, Col, Image } from "react-bootstrap";
-import { useCart } from "./context/CartContext"; 
-import { FaMinus, FaPlus, FaTimes } from "react-icons/fa";
-import ClientLayout from "./common/layouts/ClientLayout";
+import React, { useContext } from "react";
+import { CartContext } from "./context/CartContext";
+import { Button, Card, Table, Row, Col } from "react-bootstrap";
+import { FaTrash, FaMinus, FaPlus } from "react-icons/fa";
 import { BaseUrl } from "./common/BaseUrl";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import ClientLayout from "./common/layouts/ClientLayout";
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeItem } = useCart();
-  const navigate = useNavigate(); 
+  const { cartData, incrementQty, decrementQty, removeFromCart } =
+    useContext(CartContext);
 
-  const proceedToCheckout = () => {
-    navigate("/checkout");
-  };
+  const totalPrice = cartData
+    .reduce((acc, item) => acc + Number(item.price) * item.qty, 0)
+    .toFixed(2);
 
   return (
     <ClientLayout>
-      <div className="container py-5">
-        <h3 className="text-center mb-4 fw-bold">Your Shopping Cart</h3>
-        {cartItems.length === 0 ? (
-          <div className="text-center text-muted">
-            <p>Your cart is empty. Start adding some items!</p>
+      <div className="container my-5">
+        <h2 className="text-center mb-4">Your Shopping Cart</h2>
+        {cartData.length === 0 ? (
+          <div className="text-center">
+            <p>Your cart is empty.</p>
+            <Link to="/" className="btn btn-primary">
+              Continue Shopping
+            </Link>
           </div>
         ) : (
-          <>
-            <Table
-              striped
-              bordered
-              hover
-              responsive
-              className="cart-table rounded"
-            >
-              <thead className="bg-primary text-white">
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <Image
+          <Row className="justify-content-center">
+            {/* Table with Products */}
+            <Col md={8}>
+              <Table striped bordered hover responsive className="cart-table">
+                <thead className="cart-table-header">
+                  <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartData.map((item) => (
+                    <tr key={item.id}>
+                      <td>
+                        <img
                           src={`${BaseUrl}${item.image}`}
                           alt={item.name}
-                          rounded
-                          className="cart-item-img me-3"
+                          className="cart-item-image"
                         />
-                        <span className="ms-3 cart-item-name">{item.name}</span>
-                      </div>
-                    </td>
-                    <td>${item.price}</td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
+                      </td>
+                      <td>{item.name}</td>
+                      <td>${Number(item.price).toFixed(2)}</td>
+                      <td>
+                        <div className="d-flex justify-content-center">
+                          <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            className="me-2 cart-btn"
+                            onClick={() => decrementQty(item.id)}
+                          >
+                            <FaMinus />
+                          </Button>
+                          <span>{item.qty}</span>
+                          <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            className="ms-2 cart-btn"
+                            onClick={() => incrementQty(item.id)}
+                          >
+                            <FaPlus />
+                          </Button>
+                        </div>
+                      </td>
+                      <td>${(Number(item.price) * item.qty).toFixed(2)}</td>
+                      <td>
                         <Button
-                          variant="outline-secondary"
+                          variant="danger"
                           size="sm"
-                          onClick={() => updateQuantity(item.id, -1)}
-                          disabled={item.quantity === 1}
-                          className="cart-qty-btn"
+                          onClick={() => removeFromCart(item.id)}
                         >
-                          <FaMinus />
+                          <FaTrash />
                         </Button>
-                        <span className="mx-3 cart-qty-text">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="cart-qty-btn"
-                        >
-                          <FaPlus />
-                        </Button>
-                      </div>
-                    </td>
-                    <td>${(item.price * item.quantity).toFixed(2)}</td>
-                    <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => removeItem(item.id)}
-                        className="cart-remove-btn"
-                      >
-                        <FaTimes />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                <tr className="font-weight-bold">
-                  <td colSpan="3" className="text-end">
-                    <h5>Total:</h5>
-                  </td>
-                  <td colSpan="2">
-                    <h5>
-                      $
-                      {cartItems
-                        .reduce(
-                          (acc, item) => acc + item.price * item.quantity,
-                          0
-                        )
-                        .toFixed(2)}
-                    </h5>
-                  </td>
-                </tr>
-              </tbody>
-            </Table>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
 
-            <Row>
-              <Col className="text-end mt-4">
-                <Button
-                  variant="primary"
-                  className="w-25 cart-checkout-btn"
-                  onClick={proceedToCheckout} // Navigate to Checkout
-                >
-                  Proceed to Checkout
-                </Button>
-              </Col>
-            </Row>
-          </>
+            {/* Summary Cart (Aligned to the Right Below the Table) */}
+            <Col md={4} className="mt-4">
+              <Card className="cart-summary-card shadow-sm border-0 rounded-lg">
+                <Card.Body>
+                  <h5 className="text-center">Summary</h5>
+                  <div className="d-flex justify-content-between mt-3">
+                    <span className="fw-semibold">Subtotal</span>
+                    <span className="fw-bold">${totalPrice}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mt-2">
+                    <span className="fw-semibold">Shipping</span>
+                    <span className="text-muted">Calculated at checkout</span>
+                  </div>
+                  <hr />
+                  <div className="d-flex justify-content-between">
+                    <span className="fw-bold">Total</span>
+                    <span className="fw-bold">${totalPrice}</span>
+                  </div>
+                  <Button
+                    variant="primary"
+                    className="w-100 mt-3"
+                    as={Link}
+                    to="/checkout"
+                  >
+                    Proceed to Checkout
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         )}
       </div>
     </ClientLayout>

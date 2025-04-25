@@ -1,26 +1,33 @@
-import React, { useState } from "react";
-import { Card, Button, Badge, Modal, Offcanvas, Image } from "react-bootstrap";
+import React, { useContext, useState } from "react";
+import { Card, Button, Badge, Modal, Offcanvas } from "react-bootstrap";
 import {
   FaShoppingCart,
   FaEye,
   FaStar,
   FaStarHalfAlt,
-  FaPlus,
   FaMinus,
-  FaTimes,
+  FaPlus,
+  FaTrash,
 } from "react-icons/fa";
-import { BaseUrl } from "./BaseUrl"; 
-import { useCart } from "../context/CartContext";
+import { BaseUrl } from "./BaseUrl";
+import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
-  const fixedRating = 4.2;
-  const [showModal, setShowModal] = useState(false);
-  const [showCart, setShowCart] = useState(false);
+  const {
+    addToCart,
+    showCart,
+    setShowCart,
+    cartData,
+    incrementQty,
+    decrementQty,
+    removeFromCart,
+  } = useContext(CartContext);
 
   const navigate = useNavigate();
 
-  const { cartItems, addToCart, updateQuantity, removeItem } = useCart();
+  const fixedRating = 4.2;
+  const [showModal, setShowModal] = useState(false);
 
   const getRating = () => {
     const fullStars = Math.floor(fixedRating);
@@ -31,17 +38,14 @@ const ProductCard = ({ product }) => {
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
 
-  const handleShowCart = () => setShowCart(true);
-  const handleCloseCart = () => setShowCart(false);
-
   const handleAddToCart = () => {
     addToCart(product);
-    handleShowCart();
+    setShowCart(true);
   };
 
-  const handleCheckout = () => {
-    navigate('/checkout');
-  };
+  const handleToCheckout = () => {
+    navigate("/checkout");
+  }
 
   return (
     <>
@@ -74,7 +78,7 @@ const ProductCard = ({ product }) => {
               className="rounded-circle me-2"
               size="sm"
               title="Add to Cart"
-              onClick={handleAddToCart} // Trigger add to cart
+              onClick={handleAddToCart}
             >
               <FaShoppingCart />
             </Button>
@@ -83,7 +87,7 @@ const ProductCard = ({ product }) => {
               className="rounded-circle"
               size="sm"
               title="View Details"
-              onClick={handleShowModal} // Trigger modal on click
+              onClick={handleShowModal}
             >
               <FaEye />
             </Button>
@@ -110,7 +114,6 @@ const ProductCard = ({ product }) => {
           <Card.Text className="small text-secondary line-clamp-2 mb-3">
             {product.description}
           </Card.Text>
-          {/* Rating Stars */}
           <div className="d-flex align-items-center mb-2">
             {[...Array(getRating().fullStars)].map((_, index) => (
               <FaStar
@@ -136,7 +139,11 @@ const ProductCard = ({ product }) => {
             <span className="text-muted small ms-2">({fixedRating})</span>
           </div>
           <div className="mt-auto d-grid">
-            <Button variant="primary" className="rounded-pill btn-sm">
+            <Button
+              variant="primary"
+              className="rounded-pill btn-sm"
+              onClick={handleAddToCart}
+            >
               Shop Now
             </Button>
           </div>
@@ -172,11 +179,10 @@ const ProductCard = ({ product }) => {
           <p>
             <strong>Stock:</strong> {product.qty} left
           </p>
-          {/* Rating in Modal */}
           <div className="d-flex align-items-center mb-2">
             {[...Array(getRating().fullStars)].map((_, index) => (
               <FaStar
-                key={`full-${product.id}-${index}`}
+                key={`full-modal-${product.id}-${index}`}
                 className="text-warning me-1"
                 size={14}
               />
@@ -190,7 +196,7 @@ const ProductCard = ({ product }) => {
               ),
             ].map((_, index) => (
               <FaStar
-                key={`empty-${product.id}-${index}`}
+                key={`empty-modal-${product.id}-${index}`}
                 className="text-muted me-1"
                 size={14}
               />
@@ -208,89 +214,86 @@ const ProductCard = ({ product }) => {
         </Modal.Footer>
       </Modal>
 
-      {/* Cart OffCanvas */}
+      {/* Cart Drawer Offcanvas */}
       <Offcanvas
         show={showCart}
-        onHide={handleCloseCart}
+        onHide={() => setShowCart(false)}
         placement="end"
-        scroll
-        backdrop
       >
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Shopping Cart</Offcanvas.Title>
+          <Offcanvas.Title>Your Cart</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {cartItems.length === 0 ? (
-            <div className="text-center text-muted">
-              <p>Your cart is empty!</p>
-            </div>
+          {cartData.length === 0 ? (
+            <p>Your cart is empty.</p>
           ) : (
-            <div>
-              {cartItems.map((item) => (
-                <div key={item.id} className="d-flex align-items-center mb-4">
-                  <Image
+            <>
+              {cartData.map((item) => (
+                <div
+                  key={item.id}
+                  className="d-flex mb-3 align-items-center border-bottom pb-2"
+                >
+                  <img
                     src={`${BaseUrl}${item.image}`}
                     alt={item.name}
-                    rounded
                     style={{
-                      width: "60px",
-                      height: "60px",
+                      width: "50px",
+                      height: "50px",
                       objectFit: "cover",
                     }}
-                    className="me-3"
+                    className="me-3 rounded"
                   />
                   <div className="flex-grow-1">
-                    <h6 className="mb-1">{item.name}</h6>
-                    <span className="text-muted">${item.price}</span>
+                    <div className="fw-semibold">{item.name}</div>
+                    <div className="d-flex align-items-center">
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => decrementQty(item.id)}
+                      >
+                        <FaMinus />
+                      </Button>
+                      <span>{item.qty}</span>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        className="ms-2"
+                        onClick={() => incrementQty(item.id)}
+                      >
+                        <FaPlus />
+                      </Button>
+                    </div>
+                    <small className="text-muted">
+                      ${item.price} × {item.qty} = $
+                      {(item.price * item.qty).toFixed(2)}
+                    </small>
                   </div>
-                  <div className="d-flex align-items-center">
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => updateQuantity(item.id, -1)}
-                      disabled={item.quantity === 1}
-                    >
-                      <FaMinus />
-                    </Button>
-                    <span className="mx-2">{item.quantity}</span>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => updateQuantity(item.id, 1)}
-                    >
-                      <FaPlus />
-                    </Button>
-                    <Button
-                      variant="link"
-                      className="ms-3 text-danger"
-                      size="sm"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <FaTimes />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => removeFromCart(item.id)}
+                  >
+                    <FaTrash />
+                  </Button>
                 </div>
               ))}
-              <div className="d-flex justify-content-between">
-                <strong>Total:</strong>
-                <span>
-                  $
-                  {cartItems
-                    .reduce(
-                      (total, item) => total + item.price * item.quantity,
-                      0
-                    )
-                    .toFixed(2)}
-                </span>
+              <hr />
+              <div className="fw-bold fs-5">
+                Total: $
+                {cartData
+                  .reduce((acc, item) => acc + item.price * item.qty, 0)
+                  .toFixed(2)}
               </div>
               <Button
                 variant="primary"
                 className="mt-3 w-100"
-                onClick={handleCheckout}
+                onClick={handleToCheckout}
               >
                 Proceed to Checkout
               </Button>
-            </div>
+            </>
           )}
         </Offcanvas.Body>
       </Offcanvas>

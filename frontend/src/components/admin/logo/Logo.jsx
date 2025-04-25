@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../../common/layouts/AdminLayout";
 import axios from "axios";
+import { BaseUrl } from "../../common/BaseUrl";
 
 const Logo = () => {
   const [logos, setLogos] = useState([]);
@@ -9,11 +10,18 @@ const Logo = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
+  const getToken = () => {
+    const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+    return adminInfo?.token || "";
+  };
+
   const fetchLogos = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get("http://localhost:8000/api/logos", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
       });
       setLogos(res.data.data || []);
     } catch (err) {
@@ -42,10 +50,10 @@ const Logo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          Authorization: `Bearer ${getToken()}`,
           "Content-Type": "multipart/form-data",
         },
       };
@@ -76,9 +84,8 @@ const Logo = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
       await axios.delete(`http://localhost:8000/api/admin/logos/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchLogos();
     } catch (err) {
@@ -113,7 +120,7 @@ const Logo = () => {
                   <td>
                     {logo.image && (
                       <img
-                        src={logo.image}
+                        src={`${BaseUrl}${logo.image}`}
                         alt="Logo"
                         style={{ width: "100px", height: "auto" }}
                       />
@@ -135,11 +142,6 @@ const Logo = () => {
                   </td>
                 </tr>
               ))}
-              {logos.length === 0 && (
-                <tr>
-                  <td colSpan="3">No logos found.</td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>

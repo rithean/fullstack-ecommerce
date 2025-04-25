@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Carousel } from "react-bootstrap";
 import axios from "axios";
 import { gsap } from "gsap";
+import { Link } from "react-router-dom";
 
 const Slideshow = () => {
   const [slides, setSlides] = useState([]);
@@ -66,6 +67,7 @@ const Slideshow = () => {
             <h2 className="slide-title">{slide.title}</h2>
             <h5 className="slide-subtitle">{slide.subtitle}</h5>
             <p className="slide-description">{slide.description}</p>
+            <Link to="/shop" className="btn btn-primary mt-4 px-5 py-2 rounded-4">Shop Now</Link>
           </Carousel.Caption>
         </Carousel.Item>
       ))}

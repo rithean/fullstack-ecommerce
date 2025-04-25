@@ -15,7 +15,7 @@ class LogoController extends Controller
      */
     public function index()
     {
-        $logo = Logo::first();
+        $logo = Logo::orderBy('id', 'ASC')->get();
 
         if (!$logo) {
             return response()->json([

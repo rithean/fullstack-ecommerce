@@ -1,41 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { FaFacebook, FaTwitter, FaInstagram, FaEnvelope } from "react-icons/fa";
+import { BaseUrl } from "./BaseUrl";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const [logo, setLogoUrl] = useState("");
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/api/logos");
+        const logoPath = res.data.data[0]?.image;
+        if (logoPath) {
+          setLogoUrl(`${BaseUrl}${logoPath}`);
+        }
+      } catch (error) {
+        console.error("Failed to fetch logo:", error);
+      }
+    };
+
+    fetchLogo();
+  }, []);
+
   return (
     <footer className="bg-dark text-light py-4 mt-auto">
       <Container>
         <Row>
-          <Col md={4}>
-            <h5>RT Store</h5>
+          <Col md={4} className="mb-3 mb-md-0">
+            {logo && (
+              <img
+                src={logo}
+                alt="RT Store Logo"
+                style={{ height: "50px", marginBottom: "10px" }}
+              />
+            )}
             <p>
-              A modern ecommerce platform to explore our products, read about us, and stay
-              connected.
+              A modern ecommerce platform to explore our products, read about
+              us, and stay connected.
             </p>
           </Col>
-          <Col md={4}>
+          <Col md={4} className="mb-3 mb-md-0">
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
               <li>
-                <a href="/" className="text-light text-decoration-none">
+                <Link to="/" className="text-light text-decoration-none">
                   Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/shop" className="text-light text-decoration-none">
+                <Link to="/shop" className="text-light text-decoration-none">
                   Shop
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/about" className="text-light text-decoration-none">
+                <Link to="/about" className="text-light text-decoration-none">
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/contact" className="text-light text-decoration-none">
+                <Link to="/contact" className="text-light text-decoration-none">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </Col>
@@ -45,13 +72,28 @@ const Footer = () => {
               <FaEnvelope /> sokrithean341@gmail.com
             </p>
             <div className="d-flex gap-3">
-              <a href="#" className="text-light fs-4">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-light fs-4"
+              >
                 <FaFacebook />
               </a>
-              <a href="#" className="text-light fs-4">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-light fs-4"
+              >
                 <FaTwitter />
               </a>
-              <a href="#" className="text-light fs-4">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-light fs-4"
+              >
                 <FaInstagram />
               </a>
             </div>

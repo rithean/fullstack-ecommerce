@@ -254,6 +254,11 @@ input:focus {
   transition: background 0.3s ease;
 }
 
+.desc {
+  color: white;
+  opacity: 0.8;
+}
+
 .collection-card:hover .overlay-content {
   background: rgba(0, 0, 0, 0.6);
 }
@@ -353,95 +358,76 @@ input:focus {
   margin-top: 15px;
 }
 
-/* Cart Table Styles */
-
+/* Cart Table Styling */
 .cart-table {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 20px;
+  font-size: 1.1rem;
 }
 
-.cart-table th,
-.cart-table td {
-  padding: 15px !important;
-  text-align: center !important;
+.cart-table-header th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
 }
 
-.cart-table th {
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  background-color: #007bff !important;
-  color: white !important;
+.cart-table tbody td {
+  vertical-align: middle;
+  text-align: center;
 }
 
-.cart-table td {
-  font-size: 16px !important;
+.cart-item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
-.cart-item-img {
-  width: 80px !important;
-  height: 80px !important;
-  object-fit: cover !important;
-  border-radius: 8px !important;
+.cart-btn {
+  padding: 5px 10px;
+  border-radius: 50%;
 }
 
-.cart-item-name {
-  font-weight: 500 !important;
-  font-size: 16px !important;
+.cart-summary-card {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.cart-qty-btn {
-  border-radius: 50% !important;
-  transition: background-color 0.3s ease !important;
+.cart-summary-card .btn {
+  background-color: #007bff;
+  border: none;
 }
 
-.cart-qty-btn:hover {
-  background-color: #f0f0f0 !important;
+.cart-summary-card .btn:hover {
+  background-color: #0056b3;
 }
 
-.cart-qty-text {
-  font-size: 16px !important;
-  font-weight: 500 !important;
+.cart-summary-card hr {
+  border-top: 1px solid #dee2e6;
 }
 
-.cart-remove-btn {
-  background-color: #ff4d4f !important;
-  border-radius: 50% !important;
-  transition: background-color 0.3s ease !important;
+.cart-link {
+  position: relative;
 }
 
-.cart-remove-btn:hover {
-  background-color: #d13636 !important;
+.cart-badge {
+  position: absolute;
+  top: 3px;
+  right: 7px;
+  font-size: 10px !important;
+  color: white;
 }
 
-.cart-checkout-btn {
-  transition: background-color 0.3s ease !important;
-  border-radius: 30px !important;
-  padding: 15px !important;
-}
-
-.cart-checkout-btn:hover {
-  background-color: #28a745 !important;
-}
-
-.font-weight-bold h5 {
-  font-size: 18px !important;
-  font-weight: 600 !important;
-}
-
-/* Responsiveness */
-@media (max-width: 767px) {
-  .cart-table th,
-  .cart-table td {
-    font-size: 14px !important; 
-    padding: 10px !important;
+/* Make the Summary Card stick to the right */
+@media (max-width: 768px) {
+  .cart-table td, .cart-table th {
+    padding: 8px;
   }
 
-  .cart-item-img {
-    width: 60px !important;
-    height: 60px !important;
-  }
-
-  .cart-checkout-btn {
-    width: 100% !important;
+  /* Stack summary card on mobile */
+  .cart-summary-card {
+    margin-top: 20px;
   }
 }
