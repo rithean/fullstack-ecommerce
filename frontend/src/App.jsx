@@ -16,14 +16,16 @@ import { ToastContainer } from "react-bootstrap";
 import About from "./components/About";
 import Contact from "./components/Contact";
 import Cart from "./components/Cart";
-import Checkout from "./components/Checkout";
 import Product from "./components/admin/products/Product";
 import Slideshow from "./components/admin/slideshow/Slideshow";
 import Logo from "./components/admin/logo/Logo";
+import Collection from "./components/admin/collections/Collections";
+import Checkout from "./components/Checkout";
 
 const App = () => {
   return (
     <>
+      <ToastContainer />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -73,6 +75,15 @@ const App = () => {
           />
 
           <Route
+            path="/admin/collections"
+            element={
+              <AdminRequireAuth>
+                <Collection />
+              </AdminRequireAuth>
+            }
+          />
+
+          <Route
             path="/admin/slideshows"
             element={
               <AdminRequireAuth>
@@ -81,14 +92,16 @@ const App = () => {
             }
           />
 
-          <Route path="/admin/logos" element={
-            <AdminRequireAuth>
-              <Logo />
-            </AdminRequireAuth>
-          } />
+          <Route
+            path="/admin/logos"
+            element={
+              <AdminRequireAuth>
+                <Logo />
+              </AdminRequireAuth>
+            }
+          />
         </Routes>
       </BrowserRouter>
-      <ToastContainer />
     </>
   );
 };

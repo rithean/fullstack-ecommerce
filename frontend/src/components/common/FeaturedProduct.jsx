@@ -10,9 +10,9 @@ const FeaturedProduct = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/api/products`);
+        const res = await axios.get(`${baseUrl}/api/trending`);
         if (res.data.status) {
-          setProducts(res.data.data.data);
+          setProducts(res.data.data);
         }
       } catch (error) {
         console.error("Failed to fetch featured products", error);

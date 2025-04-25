@@ -1,53 +1,82 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
-// Create the CartContext
-const CartContext = createContext();
+export const CartContext = createContext();
 
-// CartProvider to wrap the app and provide cart state
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartData, setCartData] = useState(() => {
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [showCart, setShowCart] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cartData));
+  }, [cartData]);
 
   const addToCart = (product) => {
-    const existingProduct = cartItems.find((item) => item.id === product.id);
-    if (existingProduct) {
-      setCartItems(
-        cartItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
+    let updatedCart = [...cartData];
+    const exists = updatedCart.find((item) => item.product_id === product.id);
+
+    if (exists) {
+      exists.qty += 1;
     } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }]);
+      updatedCart.push({
+        id: `${product.id}-${Math.floor(Math.random() * 10000000)}`,
+        product_id: product.id,
+        name: product.name,
+        price: product.price,
+        qty: 1,
+        image: product.image,
+      });
     }
+
+    setCartData(updatedCart);
+    setShowCart(true);
   };
 
-  const updateQuantity = (productId, amount) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId
-          ? { ...item, quantity: Math.max(item.quantity + amount, 1) }
+  const incrementQty = (cartItemId) => {
+    const updated = cartData.map((item) =>
+      item.id === cartItemId ? { ...item, qty: item.qty + 1 } : item
+    );
+    setCartData(updated);
+  };
+
+  const decrementQty = (cartItemId) => {
+    const updated = cartData
+      .map((item) =>
+        item.id === cartItemId && item.qty > 1
+          ? { ...item, qty: item.qty - 1 }
           : item
       )
-    );
+      .filter((item) => item.qty > 0);
+    setCartData(updated);
   };
 
-  const removeItem = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.id !== productId)
-    );
+  const removeFromCart = (cartItemId) => {
+    const updated = cartData.filter((item) => item.id !== cartItemId);
+    setCartData(updated);
+  };
+
+  const clearCart = () => {
+    setCartData([]);
+    localStorage.removeItem("cart");
   };
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, updateQuantity, removeItem }}
+      value={{
+        cartData,
+        addToCart,
+        incrementQty,
+        decrementQty,
+        removeFromCart,
+        showCart,
+        setShowCart,
+        clearCart
+      }}
     >
       {children}
     </CartContext.Provider>
   );
-};
-
-// Custom hook to use the CartContext
-export const useCart = () => {
-  return useContext(CartContext);
 };

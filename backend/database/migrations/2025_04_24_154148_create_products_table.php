@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->decimal('price', 10, 2);
-            $table->string('qty');
+            $table->integer('qty');
             $table->string('description');
             $table->string('image')->nullable();
             $table->integer('status')->default(1);
+            $table->integer('is_trending')->default(0);
+            $table->integer('is_limited')->default(0);
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('brand_id')->constrained()->onDelete('cascade');
             $table->timestamps();

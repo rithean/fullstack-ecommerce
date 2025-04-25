@@ -1,7 +1,27 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Card, Button } from "react-bootstrap";
+import { BaseUrl } from "./BaseUrl";
+import { Link } from "react-router-dom";
 
 const CollectionFeatured = () => {
+  const [collection, setCollection] = useState([]);
+
+  useEffect(() => {
+    const fetchCollection = async () => {
+      try {
+        const res = await axios.get(`${BaseUrl}/api/featured`);
+        if (res.data.status) {
+          setCollection(res.data.data.filter((item) => item.status === 1));
+        }
+      } catch (error) {
+        console.error("Failed to fetch collection data", error);
+      }
+    };
+
+    fetchCollection();
+  }, []);
+
   return (
     <div className="container my-5">
       <h2 className="text-center mb-5 fw-bold text-dark">
@@ -10,74 +30,101 @@ const CollectionFeatured = () => {
       <div className="row">
         {/* Left Section */}
         <div className="col-12 col-lg-6 mb-4 mb-lg-0">
-          <Card className="shadow-lg border-0 rounded-3 h-100 overflow-hidden">
-            <div className="image-container">
-              <div
-                className="bg-image"
-                style={{
-                  backgroundImage: "url('https://placehold.co/800x500')",
-                }}
-              >
-                <div className="overlay-text">
-                  <h3 className="text-white fw-bold">Featured Item 1</h3>
-                  <p className="text-white-50 mb-3">
-                    This is a description of the featured item. It's cool and
-                    trendy!
-                  </p>
-                  <Button variant="light" className="rounded-pill px-4">
-                    View Details
-                  </Button>
+          {collection[0] && (
+            <Card className="shadow-lg border-0 rounded-3 h-100 overflow-hidden">
+              <div className="image-container">
+                <div
+                  className="bg-image"
+                  style={{
+                    backgroundImage: `url(${BaseUrl}${collection[0].image})`,
+                  }}
+                >
+                  <div className="overlay-text">
+                    <h3 className="text-white fw-bold">{collection[0].name}</h3>
+                    <p className="desc text-white mb-3">
+                      {collection[0].description}
+                    </p>
+                    <Link
+                      to="/shop"
+                      variant="light"
+                      className="btn btn-light rounded-pill px-4"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
 
         {/* Right Section */}
         <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-          <Card className="shadow-lg border-0 rounded-3 overflow-hidden">
-            <div className="image-container">
-              <div
-                className="bg-image"
-                style={{
-                  backgroundImage: "url('https://placehold.co/800x250')",
-                }}
-              >
-                <div className="overlay-text">
-                  <h5 className="text-white fw-bold mb-3">Item 2</h5>
-                  <Button variant="light" className="rounded-pill px-4">
-                    View Details
-                  </Button>
+          {collection[1] && (
+            <Card className="shadow-lg border-0 rounded-3 overflow-hidden">
+              <div className="image-container">
+                <div
+                  className="bg-image"
+                  style={{
+                    backgroundImage: `url(${BaseUrl}${collection[1].image})`,
+                  }}
+                >
+                  <div className="overlay-text">
+                    <h5 className="text-white fw-bold mb-3">
+                      {collection[1].name}
+                    </h5>
+                    <p className="desc text-white mb-3">
+                      {collection[1].description}
+                    </p>
+                    <Link
+                      to="/shop"
+                      variant="light"
+                      className="btn btn-light rounded-pill px-4"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           <div className="row">
-            {[3, 4].map((item) => (
-              <div key={item} className="col-12 col-md-6 mb-3 mb-md-0">
-                <Card className="shadow-lg border-0 rounded-3 overflow-hidden h-100">
-                  <div className="image-container small">
-                    <div
-                      className="bg-image"
-                      style={{
-                        backgroundImage: `url('https://placehold.co/400x300?text=Item+${item}')`,
-                      }}
-                    >
-                      <div className="overlay-text">
-                        <h6 className="text-white fw-bold mb-2">Item {item}</h6>
-                        <Button
-                          variant="light"
-                          className="rounded-pill px-3 py-1"
+            {[2, 3].map(
+              (i) =>
+                collection[i] && (
+                  <div
+                    key={collection[i].id}
+                    className="col-12 col-md-6 mb-3 mb-md-0"
+                  >
+                    <Card className="shadow-lg border-0 rounded-3 overflow-hidden h-100">
+                      <div className="image-container small">
+                        <div
+                          className="bg-image"
+                          style={{
+                            backgroundImage: `url(${BaseUrl}${collection[i].image})`,
+                          }}
                         >
-                          View
-                        </Button>
+                          <div className="overlay-text">
+                            <h6 className="text-white fw-bold mb-2">
+                              {collection[i].name}
+                            </h6>
+                            <p className="desc text-white mb-3">
+                              {collection[i].description}
+                            </p>
+                            <Button
+                              variant="light"
+                              className="rounded-pill px-3 py-1"
+                            >
+                              View Detail
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </div>
-                </Card>
-              </div>
-            ))}
+                )
+            )}
           </div>
         </div>
       </div>

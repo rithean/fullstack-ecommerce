@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "../../common/layouts/AdminLayout";
 import axios from "axios";
 import { Pencil, Trash } from "react-bootstrap-icons";
+import { BaseUrl } from "../../common/BaseUrl";
 
 const defaultForm = {
   name: "",
@@ -9,6 +10,8 @@ const defaultForm = {
   qty: "",
   description: "",
   status: 1,
+  is_trending: 0,
+  is_limited: 0,
   category_id: "",
   brand_id: "",
 };
@@ -22,18 +25,24 @@ const Product = () => {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const getToken = () => {
     const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
     return adminInfo?.token || "";
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 1) => {
     try {
-      const res = await axios.get("http://localhost:8000/api/products", {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await axios.get(
+        `http://localhost:8000/api/products?page=${page}`,
+        {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
       setProducts(res.data.data.data || []);
+      setTotalPages(res.data.data.last_page || 1);
     } catch (err) {
       console.error("Fetch products error:", err);
     }
@@ -62,10 +71,10 @@ const Product = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(currentPage);
     fetchCategories();
     fetchBrands();
-  }, []);
+  }, [currentPage]);
 
   const handleModalShow = (product = null) => {
     if (product) {
@@ -77,6 +86,8 @@ const Product = () => {
         qty: product.qty,
         description: product.description,
         status: product.status,
+        is_trending: product.is_trending,
+        is_limited: product.is_limited,
         category_id: product.category_id,
         brand_id: product.brand_id,
       });
@@ -130,7 +141,7 @@ const Product = () => {
         );
       }
       handleModalClose();
-      fetchProducts();
+      fetchProducts(currentPage);
     } catch (err) {
       console.error("Submit error:", err);
     }
@@ -145,6 +156,57 @@ const Product = () => {
     } catch (err) {
       console.error("Delete error:", err);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    if (currentPage > 1) {
+      pages.push(
+        <li className="page-item" key="prev">
+          <button
+            className="page-link"
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            Previous
+          </button>
+        </li>
+      );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <li
+          className={`page-item ${i === currentPage ? "active" : ""}`}
+          key={i}
+        >
+          <button className="page-link" onClick={() => handlePageChange(i)}>
+            {i}
+          </button>
+        </li>
+      );
+    }
+
+    if (currentPage < totalPages) {
+      pages.push(
+        <li className="page-item" key="next">
+          <button
+            className="page-link"
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            Next
+          </button>
+        </li>
+      );
+    }
+
+    return <ul className="pagination justify-content-center">{pages}</ul>;
   };
 
   return (
@@ -162,12 +224,15 @@ const Product = () => {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Image</th>
               <th>Name</th>
               <th>Qty</th>
               <th>Price</th>
               <th>Category</th>
               <th>Brand</th>
               <th>Status</th>
+              <th>Trending</th>
+              <th>Limited</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -175,17 +240,28 @@ const Product = () => {
             {products.map((item) => (
               <tr key={item.id}>
                 <td>{item.id}</td>
+                <td>
+                  {item.image && (
+                    <img
+                      src={`${BaseUrl}${item.image}`}
+                      alt={item.name}
+                      style={{ width: "100px", height: "60px" }}
+                    />
+                  )}
+                </td>
                 <td>{item.name}</td>
                 <td>{item.qty}</td>
                 <td>{item.price}</td>
                 <td>
-                  {categories.find((cat) => cat.id === item.category_id)
-                    ?.name || "N/A"}
+                  {categories.find((c) => c.id === item.category_id)?.name ||
+                    "N/A"}
                 </td>
                 <td>
                   {brands.find((b) => b.id === item.brand_id)?.name || "N/A"}
                 </td>
                 <td>{item.status === 1 ? "Active" : "Inactive"}</td>
+                <td>{item.is_trending === 1 ? "Trending" : "Not"}</td>
+                <td>{item.is_limited === 1 ? "Limited" : "Not"}</td>
                 <td>
                   <button
                     className="btn btn-sm btn-warning me-2"
@@ -206,6 +282,8 @@ const Product = () => {
         </table>
       </div>
 
+      {renderPagination()}
+
       {showModal && (
         <div
           className="modal fade show d-block"
@@ -217,6 +295,7 @@ const Product = () => {
                 <div className="modal-header">
                   <h5>{editMode ? "Edit Product" : "Create Product"}</h5>
                   <button
+                    type="button"
                     className="btn-close"
                     onClick={handleModalClose}
                   ></button>
@@ -241,6 +320,7 @@ const Product = () => {
                       />
                     </div>
                   ))}
+
                   <div className="mb-3">
                     <label className="form-label">Category</label>
                     <select
@@ -258,6 +338,7 @@ const Product = () => {
                       ))}
                     </select>
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label">Brand</label>
                     <select
@@ -275,37 +356,65 @@ const Product = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label">Status</label>
-                    <select
-                      name="status"
-                      className="form-select"
-                      value={form.status}
-                      onChange={handleChange}
-                    >
-                      <option value={1}>Active</option>
-                      <option value={0}>Inactive</option>
-                    </select>
+
+                  <div className="row mb-3">
+                    <div className="col">
+                      <label className="form-label">Status</label>
+                      <select
+                        name="status"
+                        className="form-select"
+                        value={form.status}
+                        onChange={handleChange}
+                      >
+                        <option value={1}>Active</option>
+                        <option value={0}>Inactive</option>
+                      </select>
+                    </div>
+                    <div className="col">
+                      <label className="form-label">Trending</label>
+                      <select
+                        name="is_trending"
+                        className="form-select"
+                        value={form.is_trending}
+                        onChange={handleChange}
+                      >
+                        <option value={1}>Trending</option>
+                        <option value={0}>Not Trending</option>
+                      </select>
+                    </div>
+                    <div className="col">
+                      <label className="form-label">Limited</label>
+                      <select
+                        name="is_limited"
+                        className="form-select"
+                        value={form.is_limited}
+                        onChange={handleChange}
+                      >
+                        <option value={1}>Limited</option>
+                        <option value={0}>Not Limited</option>
+                      </select>
+                    </div>
                   </div>
+
                   <div className="mb-3">
                     <label className="form-label">Image</label>
                     <input
                       type="file"
                       className="form-control"
-                      accept="image/*"
                       onChange={(e) => setImage(e.target.files[0])}
                     />
                   </div>
                 </div>
                 <div className="modal-footer">
+                  <button type="submit" className="btn btn-success">
+                    {editMode ? "Update" : "Create"}
+                  </button>
                   <button
+                    type="button"
                     className="btn btn-secondary"
                     onClick={handleModalClose}
                   >
                     Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editMode ? "Update" : "Create"}
                   </button>
                 </div>
               </form>
