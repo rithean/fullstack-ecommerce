@@ -4,15 +4,17 @@ import "./assets/css/style.css";
 import App from "./App.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "antd/dist/reset.css";
-import { AdminAuthProvider } from "./components/context/AdminAuth.jsx";
+import { AuthProvider } from "./components/context/AuthContext.jsx";
 import { CartProvider } from "./components/context/CartContext.jsx";
+import { ToastContainer } from "react-toastify";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AdminAuthProvider>
+    <AuthProvider>
       <CartProvider>
         <App />
+        <ToastContainer />
       </CartProvider>
-    </AdminAuthProvider>
+    </AuthProvider>
   </StrictMode>
 );

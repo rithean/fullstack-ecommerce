@@ -19,7 +19,7 @@ const Slideshow = () => {
 
   const fetchSlideshows = async () => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
       if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;

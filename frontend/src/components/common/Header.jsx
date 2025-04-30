@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar, Nav, NavDropdown, Badge } from "react-bootstrap";
 import { FaCartPlus, FaUserCircle } from "react-icons/fa";
-import { AdminAuthContext } from "../context/AdminAuth";
+import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { BaseUrl } from "./BaseUrl";
 import axios from "axios";
 
 const Header = () => {
-  const { logout } = useContext(AdminAuthContext);
+  const { logout } = useContext(AuthContext);
   const { cartData } = useContext(CartContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
@@ -16,12 +16,12 @@ const Header = () => {
 
   useEffect(() => {
     const checkLogin = () => {
-      const adminInfo = localStorage.getItem("adminInfo");
+      const adminInfo = localStorage.getItem("userInfo");
       setIsLoggedIn(!!adminInfo);
     };
 
     checkLogin();
-    window.addEventListener("storage", checkLogin); // Sync across tabs
+    window.addEventListener("storage", checkLogin);
 
     const fetchLogo = async () => {
       try {

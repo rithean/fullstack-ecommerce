@@ -29,7 +29,7 @@ const Product = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const getToken = () => {
-    const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+    const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
     return adminInfo?.token || "";
   };
 
