@@ -8,21 +8,21 @@ import {
   FaImage,
   FaImages,
 } from "react-icons/fa";
-import { AdminAuthContext } from "../context/AdminAuth";
+import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { BaseUrl } from "./BaseUrl";
 
 const Sidebar = () => {
-  const { logout } = useContext(AdminAuthContext);
+  const { logout } = useContext(AuthContext);
   const [logoUrl, setLogoUrl] = useState("");
 
   useEffect(() => {
     const fetchLogo = async () => {
       try {
         const res = await axios.get("http://localhost:8000/api/logos");
-        const logoPath = res.data.data[0]?.image; // Assuming you want the first logo
+        const logoPath = res.data.data[0]?.image; 
         if (logoPath) {
-          setLogoUrl(`${BaseUrl}${logoPath}`); // Concatenate with the base URL
+          setLogoUrl(`${BaseUrl}${logoPath}`); 
         }
       } catch (error) {
         console.error("Failed to fetch logo:", error);
@@ -40,13 +40,13 @@ const Sidebar = () => {
             src={logoUrl}
             alt="Admin Panel Logo"
             style={{
-              height: "50px", 
+              height: "50px",
               objectFit: "cover",
-              maxWidth: "100%", 
+              maxWidth: "100%",
             }}
           />
         ) : (
-          <h3 className="text-white">Admin Panel</h3> 
+          <h3 className="text-white">Admin Panel</h3>
         )}
       </div>
       <ul className="nav flex-column mb-auto">

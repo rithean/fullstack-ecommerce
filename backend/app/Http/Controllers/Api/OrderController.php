@@ -57,6 +57,7 @@ class OrderController extends Controller
         }
 
         return response()->json([
+            'status' => true,
             'message' => 'Order placed successfully.',
             'order' => $order->load('items'),
         ], 201);
@@ -67,7 +68,10 @@ class OrderController extends Controller
     public function myOrders(Request $request)
     {
         $orders = Order::with('items')->where('user_id', $request->user()->id)->latest()->get();
-        return response()->json($orders);
+        return response()->json([
+            'status' => true,
+            'data' => $orders,
+        ]);
     }
 
     // View one order
@@ -79,14 +83,20 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json($order);
+        return response()->json([
+            'status' => true,
+            'data' => $order
+        ]);
     }
 
     // Admin: all orders
     public function index()
     {
         $orders = Order::with(['user', 'items'])->latest()->get();
-        return response()->json($orders);
+        return response()->json([
+            'status' => true,
+            'data' => $orders,
+        ]);
     }
 
     // Admin: update order
@@ -96,6 +106,7 @@ class OrderController extends Controller
         $order->update($request->only(['status', 'payment_status']));
 
         return response()->json([
+            'status' => true,
             'message' => 'Order updated successfully.',
             'order' => $order
         ]);
@@ -108,6 +119,7 @@ class OrderController extends Controller
         $order->delete();
 
         return response()->json([
+            'status' => true,
             'message' => 'Order deleted successfully.'
         ]);
     }

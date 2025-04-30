@@ -2,13 +2,13 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
-import { AdminAuthContext } from "../context/AdminAuth";
+import { AuthContext } from "../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 
 const Login = () => {
-  const { login } = useContext(AdminAuthContext);
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,13 +32,14 @@ const Login = () => {
       const result = res.data;
 
       if (result.status === true) {
-        const adminInfo = {
+        const userInfo = {
           token: result.token,
           id: result.user.id,
           name: result.user.name,
+          role: result.user.role,
         };
-        localStorage.setItem("adminInfo", JSON.stringify(adminInfo));
-        login(adminInfo);
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        login(userInfo);
         setSuccessMessage("Login Successful");
         if (result.user.role === "admin") {
           navigate("/admin/dashboard");

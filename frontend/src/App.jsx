@@ -11,16 +11,18 @@ import SignUp from "./components/auth/Signup";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import VerifyOtp from "./components/auth/VerifyOtp";
 import ResetPassword from "./components/auth/ResetPassword";
-import { AdminRequireAuth } from "./components/admin/AdminRequireAuth";
-import { ToastContainer } from "react-bootstrap";
+import { ToastContainer } from "react-toastify";
 import About from "./components/About";
 import Contact from "./components/Contact";
 import Cart from "./components/Cart";
+import Profile from "./components/Profile";
 import Product from "./components/admin/products/Product";
 import Slideshow from "./components/admin/slideshow/Slideshow";
 import Logo from "./components/admin/logo/Logo";
 import Collection from "./components/admin/collections/Collections";
 import Checkout from "./components/Checkout";
+import ClientRequireAuth from "./components/common/ClientRequireAuth";
+import { AdminRequireAuth } from "./components/admin/AdminRequireAuth";
 
 const App = () => {
   return (
@@ -29,11 +31,41 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route
+            path="/shop"
+            element={
+              <ClientRequireAuth>
+                <Shop />
+              </ClientRequireAuth>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <ClientRequireAuth>
+                <About />
+              </ClientRequireAuth>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <ClientRequireAuth>
+                <Contact />
+              </ClientRequireAuth>
+            }
+          />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+
+          <Route
+            path="/profile"
+            element={
+              <ClientRequireAuth>
+                <Profile />
+              </ClientRequireAuth>
+            }
+          />
 
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/signup" element={<SignUp />} />

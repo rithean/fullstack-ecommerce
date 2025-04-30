@@ -93,7 +93,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => true,
-                'user' => $user
+                'data' => $user
             ]);
         } catch (JWTException $e) {
             return response()->json([

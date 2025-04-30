@@ -2,15 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Admin\{
+use App\Http\Controllers\Api\{
     BrandController,
     CategoryController,
     CollectionController,
     LogoController,
     ProductController,
-    SlideshowController
+    SlideshowController,
+    OrderController,
+    UserController
 };
-use App\Http\Controllers\Api\OrderController;
 
 /*
 |----------------------------------------------------------------------
@@ -62,8 +63,8 @@ Route::get('logos/{id}', [LogoController::class, 'show']);
 
 Route::middleware('requireAuth')->group(function () {
     Route::post('orders', [OrderController::class, 'saveOrder']);
-    Route::get('orders', [OrderController::class, 'myOrders']); 
-    Route::get('orders/{id}', [OrderController::class, 'show']); 
+    Route::get('orders', [OrderController::class, 'myOrders']);
+    Route::get('orders/{id}', [OrderController::class, 'show']);
 });
 
 /*
@@ -105,7 +106,13 @@ Route::prefix('admin')->middleware(['requireAuth', 'checkRole:admin'])->group(fu
     Route::delete('collections/{id}', [CollectionController::class, 'destroy']);
 
     // Order
-    Route::get('orders', [OrderController::class, 'index']);    
-    Route::put('orders/{id}', [OrderController::class, 'update']); 
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::put('orders/{id}', [OrderController::class, 'update']);
     Route::delete('orders/{id}', [OrderController::class, 'destroy']);
+
+    // User
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('users/{id}', [UserController::class, 'show']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'destroy']);
 });
