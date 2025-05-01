@@ -18,18 +18,18 @@ const Collection = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
-  const getToken = () => {
-    const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-    console.log(adminInfo);
-    return adminInfo?.token || "";
-  };
-
   const fetchCollections = async () => {
     try {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
       const res = await axios.get("http://localhost:8000/api/collections", {
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${getToken()}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setCollections(res.data.data || []);
@@ -89,7 +89,7 @@ const Collection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
       if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;
@@ -131,7 +131,7 @@ const Collection = () => {
 
   const handleDelete = async (id) => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
       if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;

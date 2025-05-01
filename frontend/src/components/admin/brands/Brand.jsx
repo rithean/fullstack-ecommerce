@@ -12,15 +12,15 @@ const Brand = () => {
 
   const fetchBrands = async () => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;
       }
-
+      const token = adminInfo.token;
       const res = await axios.get("http://localhost:8000/api/brands", {
         headers: {
-          Authorization: `Bearer ${adminInfo.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setBrands(res.data.data || []);
@@ -60,15 +60,15 @@ const Brand = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;
       }
-
+      const token = adminInfo.token;
       const config = {
         headers: {
-          Authorization: `Bearer ${adminInfo.token}`,
+          Authorization: `Bearer ${token}`,
         },
       };
 
@@ -95,15 +95,16 @@ const Brand = () => {
 
   const handleDelete = async (id) => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
         console.error("Authentication token missing.");
         return;
       }
+      const token = adminInfo.token;
 
       await axios.delete(`http://localhost:8000/api/admin/brands/${id}`, {
         headers: {
-          Authorization: `Bearer ${adminInfo.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

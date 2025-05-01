@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 
+
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -40,12 +41,16 @@ const Login = () => {
         };
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
         login(userInfo);
+        toast.success("Login Successful");
         setSuccessMessage("Login Successful");
-        if (result.user.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/");
-        }
+        setTimeout(() => {
+          if (result.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+        }, 2000);
+
       } else {
         setErrorMessage(result.error || "An error occurred during login.");
         toast.error(result.error || "An error occurred during login.");

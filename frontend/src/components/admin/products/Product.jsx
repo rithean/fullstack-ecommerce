@@ -28,17 +28,18 @@ const Product = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const getToken = () => {
-    const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
-    return adminInfo?.token || "";
-  };
-
   const fetchProducts = async (page = 1) => {
     try {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
       const res = await axios.get(
         `http://localhost:8000/api/products?page=${page}`,
         {
-          headers: { Authorization: `Bearer ${getToken()}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setProducts(res.data.data.data || []);
@@ -50,8 +51,14 @@ const Product = () => {
 
   const fetchCategories = async () => {
     try {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
       const res = await axios.get("http://localhost:8000/api/categories", {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(res.data.data || []);
     } catch (err) {
@@ -61,8 +68,14 @@ const Product = () => {
 
   const fetchBrands = async () => {
     try {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
       const res = await axios.get("http://localhost:8000/api/brands", {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setBrands(res.data.data || []);
     } catch (err) {
@@ -113,8 +126,13 @@ const Product = () => {
   };
 
   const handleSubmit = async (e) => {
+    const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!adminInfo || !adminInfo.token) {
+      console.error("Authentication token missing.");
+      return;
+    }
+    const token = adminInfo.token;
     e.preventDefault();
-    const token = getToken();
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -149,8 +167,14 @@ const Product = () => {
 
   const handleDelete = async (id) => {
     try {
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
       await axios.delete(`http://localhost:8000/api/admin/products/${id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(products.filter((p) => p.id !== id));
     } catch (err) {
@@ -160,6 +184,8 @@ const Product = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+
+    
   };
 
   const renderPagination = () => {

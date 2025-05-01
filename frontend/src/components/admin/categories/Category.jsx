@@ -16,11 +16,15 @@ const Category = () => {
 
   const fetchCategories = async () => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) return console.error("Token missing");
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
 
       const res = await axios.get("http://localhost:8000/api/categories", {
-        headers: { Authorization: `Bearer ${adminInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setCategories(res.data.data || []);
@@ -56,11 +60,15 @@ const Category = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) return console.error("Token missing");
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
 
       const config = {
-        headers: { Authorization: `Bearer ${adminInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       };
 
       if (editMode) {
@@ -86,11 +94,15 @@ const Category = () => {
 
   const handleDelete = async (id) => {
     try {
-      const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
-      if (!adminInfo?.token) return console.error("Token missing");
+      const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (!adminInfo || !adminInfo.token) {
+        console.error("Authentication token missing.");
+        return;
+      }
+      const token = adminInfo.token;
 
       await axios.delete(`http://localhost:8000/api/admin/categories/${id}`, {
-        headers: { Authorization: `Bearer ${adminInfo.token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       fetchCategories();
