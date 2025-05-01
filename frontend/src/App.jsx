@@ -21,7 +21,6 @@ import Slideshow from "./components/admin/slideshow/Slideshow";
 import Logo from "./components/admin/logo/Logo";
 import Collection from "./components/admin/collections/Collections";
 import Checkout from "./components/Checkout";
-import ClientRequireAuth from "./components/common/ClientRequireAuth";
 import { AdminRequireAuth } from "./components/admin/AdminRequireAuth";
 
 const App = () => {
@@ -31,27 +30,12 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route
-            path="/shop"
-            element={
-              <ClientRequireAuth>
-                <Shop />
-              </ClientRequireAuth>
-            }
-          />
+          <Route path="/shop" element={<Shop />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-
-          <Route
-            path="/profile"
-            element={
-              <ClientRequireAuth>
-                <Profile />
-              </ClientRequireAuth>
-            }
-          />
+          <Route path="/profile" element={<Profile />} />
 
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/signup" element={<SignUp />} />

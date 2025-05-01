@@ -43,7 +43,7 @@ input:focus {
   object-fit: cover;
   height: 100vh; 
   transition: transform 0.5s ease-in-out;
-  filter: brightness(50%);
+  filter: brightness(30%);
 }
 
 .slide-image:hover {
@@ -190,7 +190,7 @@ input:focus {
 }
 
 .overlay-text {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.7);
   padding: 1.5rem;
   text-align: center;
   width: 100%;

@@ -6,96 +6,101 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
-  const [logo, setLogoUrl] = useState("");
+  const [footer, setFooter] = useState(null);
 
   useEffect(() => {
-    const fetchLogo = async () => {
+    const fetchFooter = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/logos");
-        const logoPath = res.data.data[0]?.image;
-        if (logoPath) {
-          setLogoUrl(`${BaseUrl}${logoPath}`);
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const token = userInfo ? userInfo.token : null;
+
+        const res = await axios.get(`${BaseUrl}/api/footers`, {
+          headers: {
+            "Accept": 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        if (res.data.status) {
+          setFooter(res.data.data);
         }
-      } catch (error) {
-        console.error("Failed to fetch logo:", error);
+      } catch (err) {
+        console.error("Failed to load footer:", err);
       }
     };
 
-    fetchLogo();
+    fetchFooter();
   }, []);
+
+  if (!footer) return null;
 
   return (
     <footer className="bg-dark text-light py-4 mt-auto">
       <Container>
         <Row>
           <Col md={4} className="mb-3 mb-md-0">
-            {logo && (
+            {footer.logo && (
               <img
-                src={logo}
-                alt="RT Store Logo"
+                src={`${BaseUrl}${footer.logo}`}
+                alt="Footer Logo"
                 style={{ height: "50px", marginBottom: "10px" }}
               />
             )}
-            <p>
-              A modern ecommerce platform to explore our products, read about
-              us, and stay connected.
-            </p>
+            <p>{footer.description}</p>
           </Col>
           <Col md={4} className="mb-3 mb-md-0">
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
-              <li>
-                <Link to="/" className="text-light text-decoration-none">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop" className="text-light text-decoration-none">
-                  Shop
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-light text-decoration-none">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-light text-decoration-none">
-                  Contact
-                </Link>
-              </li>
+              {Array.isArray(footer.quick_links) &&
+                footer.quick_links.map((link, idx) => (
+                  <li key={idx}>
+                    <Link
+                      to={link.path || "/"}
+                      className="text-light text-decoration-none"
+                    >
+                      {link.name || "Link"}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </Col>
           <Col md={4}>
             <h5>Connect</h5>
-            <p>
-              <FaEnvelope /> sokrithean341@gmail.com
-            </p>
+            {footer.email && (
+              <p>
+                <FaEnvelope /> {footer.email}
+              </p>
+            )}
             <div className="d-flex gap-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-light fs-4"
-              >
-                <FaFacebook />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-light fs-4"
-              >
-                <FaTwitter />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-light fs-4"
-              >
-                <FaInstagram />
-              </a>
+              {footer.social_links?.facebook && (
+                <a
+                  href={footer.social_links.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-light fs-4"
+                >
+                  <FaFacebook />
+                </a>
+              )}
+              {footer.social_links?.twitter && (
+                <a
+                  href={footer.social_links.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-light fs-4"
+                >
+                  <FaTwitter />
+                </a>
+              )}
+              {footer.social_links?.instagram && (
+                <a
+                  href={footer.social_links.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-light fs-4"
+                >
+                  <FaInstagram />
+                </a>
+              )}
             </div>
           </Col>
         </Row>

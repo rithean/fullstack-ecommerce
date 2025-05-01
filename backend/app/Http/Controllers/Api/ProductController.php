@@ -33,7 +33,7 @@ class ProductController extends Controller
         $sortDir = $request->input('sort_dir', 'asc');
         $query->orderBy($sortBy, $sortDir);
 
-        $perPage = $request->input('per_page', 6);
+        $perPage = $request->input('per_page', 9);
         $products = $query->paginate($perPage);
 
         return response()->json([
