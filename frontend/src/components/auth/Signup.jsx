@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa"; 
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -67,16 +68,19 @@ const SignUp = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/auth/register", 
+        "http://localhost:8000/api/auth/register",
         form
       );
       const { message } = res.data;
-      alert(message); 
-      navigate("/auth/login"); 
+      toast.success(message); 
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 2000); 
     } catch (err) {
       const msg = err.response?.data?.message || "Sign Up failed";
       setError(msg);
     }
+
   };
 
   return (

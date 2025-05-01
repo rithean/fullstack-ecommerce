@@ -2,6 +2,8 @@ import React from "react";
 import { Container, Row, Col, Card, Image } from "react-bootstrap";
 import { FaHeart, FaUsers, FaShippingFast, FaAward } from "react-icons/fa";
 import ClientLayout from "./common/layouts/ClientLayout";
+import avatar1 from "../assets/images/rithean.jpg";
+import avatar2 from "../assets/images/tra.jpg";
 
 const About = () => {
   return (
@@ -103,11 +105,7 @@ const About = () => {
           <Row className="text-center">
             <Col md={6}>
               <Card className="border-0 shadow-sm h-100">
-                <Image
-                  src="https://via.placeholder.com/150"
-                  roundedCircle
-                  fluid
-                />
+                <Image src={avatar1} roundedCircle fluid />
                 <Card.Body>
                   <Card.Title className="fw-semibold">John Doe</Card.Title>
                   <Card.Text>Founder & CEO</Card.Text>
@@ -116,11 +114,7 @@ const About = () => {
             </Col>
             <Col md={6}>
               <Card className="border-0 shadow-sm h-100">
-                <Image
-                  src="https://via.placeholder.com/150"
-                  roundedCircle
-                  fluid
-                />
+                <Image src={avatar2} roundedCircle fluid />
                 <Card.Body>
                   <Card.Title className="fw-semibold">Jane Smith</Card.Title>
                   <Card.Text>Head of Marketing</Card.Text>
