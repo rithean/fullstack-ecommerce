@@ -11,7 +11,8 @@ use App\Http\Controllers\Api\{
     ProductController,
     SlideshowController,
     OrderController,
-    UserController
+    UserController,
+    AboutController
 };
 
 /*
@@ -64,6 +65,8 @@ Route::get('logos/{id}', [LogoController::class, 'show']);
 
 Route::get('footers', [FooterController::class, 'index']);
 Route::get('footers/{id}', [FooterController::class, 'show']);
+
+Route::get('abouts', [AboutController::class, 'index']);
 
 Route::middleware('requireAuth')->group(function () {
     Route::post('orders', [OrderController::class, 'saveOrder']);

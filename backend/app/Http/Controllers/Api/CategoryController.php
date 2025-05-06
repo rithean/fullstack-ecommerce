@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
@@ -36,7 +37,8 @@ class CategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'status' => 'nullable|integer|in:0,1'
+            'status' => 'nullable|integer|in:0,1',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
         if ($validator->fails()) {
@@ -46,10 +48,20 @@ class CategoryController extends Controller
             ], 422);
         }
 
-        Category::create([
-            'name' => $request->name,
-            'status' => $request->status
+        $data = $request->only([
+            'name',
+            'status'
         ]);
+
+        if ($request->hasFile('image')) {
+            $filename = time() . '_' . $request->file('image')->getClientOriginalName();
+            $path = $request->file('image')->storeAs('uploads/categories', $filename, 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
+
+
+        Category::create($data);
 
         return response()->json([
             'status' => true,
@@ -93,8 +105,9 @@ class CategoryController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'status' => 'nullable|integer|in:0,1'
+            'name' => 'sometimes|required|string|max:255',
+            'status' => 'nullable|integer|in:0,1',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096'
         ]);
 
         if ($validator->fails()) {
@@ -104,10 +117,23 @@ class CategoryController extends Controller
             ], 422);
         }
 
-        $category->update([
-            'name' => $request->name,
-            'status' => $request->status
+        $data = $request->only([
+            'name',
+            'status'
         ]);
+
+        if ($request->hasFile('image')) {
+            if ($category->image) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $category->image));
+            }
+
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/categorires', $filename, 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
+        $category->update($data);
 
         return response()->json([
             'status' => true,
@@ -127,6 +153,10 @@ class CategoryController extends Controller
                 'status' => false,
                 'message' => 'Category not found'
             ], 404);
+        }
+
+        if ($category->image) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $category->image));
         }
 
         $category->delete();
