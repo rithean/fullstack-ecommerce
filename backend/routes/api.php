@@ -6,11 +6,13 @@ use App\Http\Controllers\Api\{
     BrandController,
     CategoryController,
     CollectionController,
+    FooterController,
     LogoController,
     ProductController,
     SlideshowController,
     OrderController,
-    UserController
+    UserController,
+    AboutController
 };
 
 /*
@@ -60,6 +62,11 @@ Route::get('slideshows/{id}', [SlideshowController::class, 'show']);
 
 Route::get('logos', [LogoController::class, 'index']);
 Route::get('logos/{id}', [LogoController::class, 'show']);
+
+Route::get('footers', [FooterController::class, 'index']);
+Route::get('footers/{id}', [FooterController::class, 'show']);
+
+Route::get('abouts', [AboutController::class, 'index']);
 
 Route::middleware('requireAuth')->group(function () {
     Route::post('orders', [OrderController::class, 'saveOrder']);
@@ -115,4 +122,8 @@ Route::prefix('admin')->middleware(['requireAuth', 'checkRole:admin'])->group(fu
     Route::get('users/{id}', [UserController::class, 'show']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
+
+    Route::post('footers', [FooterController::class, 'store']);
+    Route::put('footers/{id}', [FooterController::class, 'update']);
+    Route::delete('footers/{id}', [FooterController::class, 'destroy']);
 });

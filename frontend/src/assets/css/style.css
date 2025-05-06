@@ -43,7 +43,7 @@ input:focus {
   object-fit: cover;
   height: 100vh; 
   transition: transform 0.5s ease-in-out;
-  filter: brightness(50%);
+  filter: brightness(30%);
 }
 
 .slide-image:hover {
@@ -190,7 +190,7 @@ input:focus {
 }
 
 .overlay-text {
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.7);
   padding: 1.5rem;
   text-align: center;
   width: 100%;
@@ -315,48 +315,98 @@ input:focus {
   100% { transform: translateX(-50%); }
 }
 
+/* About.css */
+
+/* General styles */
 .about-page {
-  background-color: #f9f9f9;
-  padding: 50px 0;
+  background-color: #f8f9fa;
 }
 
-.about-page .card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.about-page .card-body {
-  flex-grow: 1; /* Ensure the body grows to fill the available space */
-}
-
-.about-page .card-body {
-  text-align: center;
-}
-
-.about-page .card-title {
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.about-page .card-text {
-  font-size: 1rem;
-  color: #777;
-}
-
-.about-page .card img {
-  border-radius: 50%;
-  max-width: 150px;
-  height: auto;
-}
-
-.about-page h1, h2 {
+/* Header Section */
+.header-title {
+  font-size: 2.5rem;
   font-weight: bold;
+  color: #2c3e50;
 }
 
-.about-page .card-body .mt-3 {
-  margin-top: 15px;
+.header-description {
+  font-size: 1.2rem;
+  color: #7f8c8d;
 }
+
+/* Mission Section */
+.about-page .bg-light {
+  background-color: #ecf0f1;
+}
+
+.about-page .shadow {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.about-page .fw-semibold {
+  font-weight: 600;
+}
+
+/* Values Section */
+.about-page .value-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-page .value-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.about-page .value-card h5 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #34495e;
+}
+
+/* Team Section */
+.about-page .team-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-page .team-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.about-page .team-img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 5px solid #ecf0f1;
+}
+
+.about-page .card-body {
+  padding: 1.5rem;
+}
+
+.about-page .card-body h5 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.about-page .card-body p {
+  font-size: 1rem;
+  color: #7f8c8d;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 2rem;
+  }
+
+  .value-card {
+    margin-bottom: 20px;
+  }
+}
+
 
 /* Cart Table Styling */
 .cart-table {

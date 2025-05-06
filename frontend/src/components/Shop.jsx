@@ -103,7 +103,7 @@ const Shop = () => {
 
         <Row className="g-4">
           <Col xs={12} md={4} lg={3}>
-            <div className="sidebar p-4 border rounded">
+            <div className="sidebar p-4 border rounded sticky-top">
               <input
                 type="text"
                 placeholder="Search products"

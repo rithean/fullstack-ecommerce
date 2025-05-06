@@ -1,22 +1,62 @@
-import React from "react";
-import { Container, Row, Col, Card, Image } from "react-bootstrap";
-import { FaHeart, FaUsers, FaShippingFast, FaAward } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col } from "react-bootstrap";
+import { FaHeart, FaAward, FaUsers, FaShippingFast } from "react-icons/fa";
+import { BaseUrl } from "./common/BaseUrl";
+import image1 from "../assets/images/rithean.jpg";
+import image2 from "../assets/images/tra.jpg";
 import ClientLayout from "./common/layouts/ClientLayout";
-import avatar1 from "../assets/images/rithean.jpg";
-import avatar2 from "../assets/images/tra.jpg";
+import axios from "axios";
+
+const profileImage = [image1, image2];
 
 const About = () => {
+  const [aboutData, setAboutData] = useState(null);
+
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const token = userInfo ? userInfo.token : null;
+
+        const res = await axios.get(`${BaseUrl}/api/abouts`, {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data.status) {
+          setAboutData(res.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load About Us data:", err);
+      }
+    };
+
+    fetchAbout();
+  }, []);
+
+  if (!aboutData) return null;
+
+  const iconMap = {
+    FaHeart: <FaHeart size={40} />,
+    FaAward: <FaAward size={40} />,
+    FaUsers: <FaUsers size={40} />,
+    FaShippingFast: <FaShippingFast size={40} />,
+  };
+
   return (
     <ClientLayout>
       <div className="about-page">
-        <Container className="my-5">
+        <Container className="py-5">
           {/* Header Section */}
           <Row className="text-center mb-5">
             <Col>
-              <h1 className="fw-bold text-dark">About Us</h1>
-              <p className="text-muted">
-                Learn more about our mission, values, and why we are the best
-                choice for your online shopping experience.
+              <h1 className="fw-bold text-dark header-title">
+                {aboutData.header_title}
+              </h1>
+              <p className="text-muted header-description">
+                {aboutData.header_description}
               </p>
             </Col>
           </Row>
@@ -24,103 +64,53 @@ const About = () => {
           {/* Mission Section */}
           <Row className="mb-5">
             <Col md={12}>
-              <Card className="shadow-sm border-0 rounded py-5">
-                <Card.Body>
-                  <Card.Title className="text-primary fw-semibold">
-                    Our Mission
-                  </Card.Title>
-                  <Card.Text>
-                    We are committed to offering a vast selection of quality
-                    products at competitive prices. Our goal is to provide an
-                    easy and seamless shopping experience for our customers.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
+              <div className="bg-light p-4 rounded shadow text-center">
+                <h5 className="text-primary fw-semibold">Our Mission</h5>
+                <p>{aboutData.mission}</p>
+              </div>
             </Col>
           </Row>
 
           {/* Values Section */}
           <Row className="mb-5 text-center">
-            <Col md={3}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body>
-                  <FaHeart className="text-danger" size={40} />
-                  <Card.Title className="mt-3">Customer First</Card.Title>
-                  <Card.Text>
-                    We prioritize our customers by offering great service, fast
-                    delivery, and hassle-free returns.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body>
-                  <FaAward className="text-warning" size={40} />
-                  <Card.Title className="mt-3">Quality Products</Card.Title>
-                  <Card.Text>
-                    Our products are carefully selected to ensure that you
-                    receive the best value for your money.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body>
-                  <FaUsers className="text-primary" size={40} />
-                  <Card.Title className="mt-3">Teamwork</Card.Title>
-                  <Card.Text>
-                    Our team works together to ensure a smooth and enjoyable
-                    experience for our customers.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body>
-                  <FaShippingFast className="text-success" size={40} />
-                  <Card.Title className="mt-3">Fast Shipping</Card.Title>
-                  <Card.Text>
-                    We offer fast, reliable shipping options so that your orders
-                    arrive as quickly as possible.
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
+            {JSON.parse(aboutData.values).map((value, idx) => (
+              <Col key={idx} md={3}>
+                <div className="bg-light p-4 rounded shadow value-card h-100">
+                  {iconMap[value.icon] || <FaHeart size={40} />}
+                  <h5 className="mt-3">{value.title}</h5>
+                  <p>{value.description}</p>
+                </div>
+              </Col>
+            ))}
           </Row>
 
-          {/* Meet the Team Section */}
+          {/* Team Section */}
           <Row className="mb-5 text-center">
             <Col>
               <h2 className="fw-bold text-dark">Meet Our Team</h2>
               <p className="text-muted">
                 Our team is passionate about delivering the best products and
-                service to you.
+                services to you.
               </p>
             </Col>
           </Row>
 
           <Row className="text-center">
-            <Col md={6}>
-              <Card className="border-0 shadow-sm h-100">
-                <Image src={avatar1} roundedCircle fluid />
-                <Card.Body>
-                  <Card.Title className="fw-semibold">John Doe</Card.Title>
-                  <Card.Text>Founder & CEO</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={6}>
-              <Card className="border-0 shadow-sm h-100">
-                <Image src={avatar2} roundedCircle fluid />
-                <Card.Body>
-                  <Card.Title className="fw-semibold">Jane Smith</Card.Title>
-                  <Card.Text>Head of Marketing</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
+            {JSON.parse(aboutData.team).map((member, idx) => (
+              <Col key={idx} md={6}>
+                <div className="card shadow border-0 team-card">
+                  <div className="card-body">
+                    <img
+                      src={profileImage[idx]}
+                      alt={member.name}
+                      className="card-img mb-3 team-img"
+                    />
+                    <h5>{member.name}</h5>
+                    <p>{member.position}</p>
+                  </div>
+                </div>
+              </Col>
+            ))}
           </Row>
         </Container>
       </div>

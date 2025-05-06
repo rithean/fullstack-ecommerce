@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class BrandController extends Controller
@@ -36,7 +37,8 @@ class BrandController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'status' => 'nullable|integer|in:0,1'
+            'status' => 'nullable|integer|in:0,1',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
         if ($validator->fails()) {
@@ -46,10 +48,18 @@ class BrandController extends Controller
             ], 422);
         }
 
-        Brand::create([
-            'name' => $request->name,
-            'status' => $request->status ?? 1
+        $data = $request->only([
+            'name',
+            'status'
         ]);
+
+        if ($request->hasFile('image')) {
+            $filename = time() . '_' . $request->file('image')->getClientOriginalName();
+            $path = $request->file('image')->storeAs('uploads/brands', $filename, 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
+        Brand::create($data);
 
         return response()->json([
             'status' => true,
@@ -92,14 +102,35 @@ class BrandController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'status' => 'nullable|integer|in:0,1'
         ]);
 
-        $brand->update([
-            'name' => $request->name,
-            'status' => $request->status
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        $data = $request->only([
+            'name',
+            'stauts'
         ]);
+
+        if ($request->hasFile('image')) {
+            if ($brand->image) {
+                Storage::disk('public')->delete(str_replace('/stroage/', '', $brand->image));
+            }
+
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('uploads/brands', $filename, 'public');
+            $data['image'] = '/storage/' . $path;
+        }
+
+        $brand->update($data);
 
         return response()->json([
             'status' => true,
@@ -119,6 +150,10 @@ class BrandController extends Controller
                 'status' => false,
                 'message' => 'Brand not found'
             ], 404);
+        }
+
+        if ($brand->image) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $brand->image));
         }
 
         $brand->delete();
