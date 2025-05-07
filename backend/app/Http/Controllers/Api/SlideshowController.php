@@ -39,7 +39,7 @@ class SlideshowController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'status' => 'nullable|integer|in:0,1'
         ]);
 
