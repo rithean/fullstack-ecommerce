@@ -48,6 +48,7 @@ Route::get('brands/{id}', [BrandController::class, 'show']);
 
 Route::get('products', [ProductController::class, 'index']);
 Route::get('products/{id}', [ProductController::class, 'show']);
+Route::get('/products/category/{id}', [ProductController::class, 'productByCategory']);
 Route::get('trending', [ProductController::class, 'trendingProduct']);
 Route::get('limited', [ProductController::class, 'limitedEdition']);
 
