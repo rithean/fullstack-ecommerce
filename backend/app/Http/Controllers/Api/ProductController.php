@@ -133,6 +133,25 @@ class ProductController extends Controller
         ], 200);
     }
 
+    public function productByCategory(string $id)
+    {
+        $products = Product::with(['category', 'brand'])
+            ->where('category_id', $id)
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No products found for this category.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $products
+        ], 200);
+    }
+
     public function update(Request $request, string $id)
     {
         $product = Product::find($id);
