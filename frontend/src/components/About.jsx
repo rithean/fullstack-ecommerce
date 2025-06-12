@@ -18,6 +18,8 @@ const About = () => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
         const token = userInfo ? userInfo.token : null;
 
+        console.log(userInfo);
+
         const res = await axios.get(`${BaseUrl}/api/abouts`, {
           headers: {
             Accept: "application/json",

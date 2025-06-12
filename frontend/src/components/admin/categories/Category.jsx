@@ -10,6 +10,9 @@ const Category = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -92,7 +95,12 @@ const Category = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const confirmDelete = (category) => {
+    setCategoryToDelete(category);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
     try {
       const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
       if (!adminInfo || !adminInfo.token) {
@@ -101,14 +109,24 @@ const Category = () => {
       }
       const token = adminInfo.token;
 
-      await axios.delete(`http://localhost:8000/api/admin/categories/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://localhost:8000/api/admin/categories/${categoryToDelete.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
+      setShowDeleteModal(false);
+      setCategoryToDelete(null);
       fetchCategories();
     } catch (err) {
       console.error("Delete error:", err.response || err);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setCategoryToDelete(null);
   };
 
   return (
@@ -149,7 +167,7 @@ const Category = () => {
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(category.id)}
+                          onClick={() => confirmDelete(category)}
                         >
                           <Trash />
                         </button>
@@ -166,7 +184,7 @@ const Category = () => {
           </table>
         </div>
 
-        {/* Modal */}
+        {/* Create/Edit Modal */}
         {showModal && (
           <div
             className="modal fade show d-block"
@@ -223,6 +241,45 @@ const Category = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div
+            className="modal fade show d-block"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Confirm Delete</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleDeleteCancel}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  Are you sure you want to delete the category{" "}
+                  <strong>{categoryToDelete?.name}</strong>?
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleDeleteConfirmed}
+                  >
+                    Yes, Delete
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleDeleteCancel}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>

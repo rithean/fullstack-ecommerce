@@ -22,12 +22,13 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token"); // assuming token is stored in localStorage
-
-        if (!token) {
-          console.error("No token found. Please log in.");
+        const adminInfo = JSON.parse(localStorage.getItem("userInfo"));
+        if (!adminInfo || !adminInfo.token) {
+          console.error("Authentication token missing.");
           return;
         }
+        
+        const token = adminInfo.token;
 
         const config = {
           headers: {
@@ -36,13 +37,13 @@ const Dashboard = () => {
         };
 
         const [productRes, categoryRes, brandRes] = await Promise.all([
-          axios.get("http://localhost:8000/api/admin/products", config),
-          axios.get("http://localhost:8000/api/admin/categories", config),
-          axios.get("http://localhost:8000/api/admin/brands", config),
+          axios.get("http://localhost:8000/api/products", config),
+          axios.get("http://localhost:8000/api/categories", config),
+          axios.get("http://localhost:8000/api/brands", config),
         ]);
 
         setStats({
-          products: productRes.data.data.length,
+          products: productRes.data.data.data.length,
           categories: categoryRes.data.data.length,
           brands: brandRes.data.data.length,
         });

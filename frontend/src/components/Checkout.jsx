@@ -85,7 +85,7 @@ const Checkout = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleOrderSubmit(); 
+    handleOrderSubmit();
   };
 
   useEffect(() => {
@@ -136,7 +136,9 @@ const Checkout = () => {
     document.body.appendChild(script);
 
     return () => {
-      script.remove();
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
       if (paypalContainer) {
         paypalContainer.innerHTML = "";
       }

@@ -27,6 +27,7 @@ const Product = () => {
   const [currentId, setCurrentId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [confirmDeletedId, setConfirmDeleteId] = useState(null);
 
   const fetchProducts = async (page = 1) => {
     try {
@@ -297,7 +298,7 @@ const Product = () => {
                   </button>
                   <button
                     className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => setConfirmDeleteId(item.id)}
                   >
                     <Trash />
                   </button>
@@ -448,6 +449,47 @@ const Product = () => {
           </div>
         </div>
       )}
+
+      {confirmDeletedId && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5>Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setConfirmDeleteId(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to delete this product?
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    handleDelete(confirmDeletedId);
+                    setConfirmDeleteId(null);
+                  }}
+                >
+                  Delete
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmDeleteId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </AdminLayout>
   );
 };
