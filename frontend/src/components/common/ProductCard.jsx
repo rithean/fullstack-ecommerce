@@ -160,7 +160,7 @@ const ProductCard = ({ product }) => {
             src={`${BaseUrl}${product.image}`}
             alt={product.name}
             className="img-fluid mb-3"
-            style={{ maxHeight: "300px", objectFit: "cover" }}
+            style={{ width: "100%", height: "300px", objectFit: "contain" }}
           />
           <p>
             <strong>Category:</strong>{" "}

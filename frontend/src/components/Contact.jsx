@@ -67,15 +67,15 @@ const Contact = () => {
                   <ul className="list-unstyled">
                     <li className="mb-3">
                       <FaPhoneAlt className="text-primary" size={20} />
-                      <span className="ms-2">+123 456 7890</span>
+                      <span className="ms-2">+855 85776303</span>
                     </li>
                     <li className="mb-3">
                       <FaEnvelope className="text-primary" size={20} />
-                      <span className="ms-2">info@example.com</span>
+                      <span className="ms-2">sokrithean341@gmail.com</span>
                     </li>
                     <li>
                       <FaMapMarkerAlt className="text-primary" size={20} />
-                      <span className="ms-2">123 Street, City, Country</span>
+                      <span className="ms-2">Phnom Penh, Cambodia</span>
                     </li>
                   </ul>
                 </Card.Body>

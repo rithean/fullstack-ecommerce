@@ -17,6 +17,7 @@ const Collection = () => {
   const [image, setImage] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentId, setCurrentId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const fetchCollections = async () => {
     try {
@@ -203,7 +204,7 @@ const Collection = () => {
                       </button>
                       <button
                         className="btn btn-danger btn-sm"
-                        onClick={() => handleDelete(slide.id)}
+                        onClick={() => setConfirmDeleteId(slide.id)}
                         title="Delete"
                       >
                         <Trash />
@@ -323,6 +324,46 @@ const Collection = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteId && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setConfirmDeleteId(null)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to delete this collection?
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmDeleteId(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    handleDelete(confirmDeleteId);
+                    setConfirmDeleteId(null);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
